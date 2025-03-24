@@ -1,4 +1,5 @@
-﻿using Tesseract;
+﻿using Emgu.CV;
+using Emgu.CV.OCR;
 
 internal static class Program
 {
@@ -21,12 +22,12 @@ internal static class Program
 				Console.WriteLine("Please enter a valid path.");
 				continue;
 			}
+			
+			using Tesseract tes = new Tesseract("tessdata/", "deu", OcrEngineMode.Default);
+			using Pix pic = new Pix(CvInvoke.Imread("FahrplanExample.png"));
 
-			using TesseractEngine engine = new TesseractEngine("tessdata/", "deu", EngineMode.Default);
-			using Pix? img = Pix.LoadFromFile(path);
-			using Page? page = engine.Process(img);
-
-			string text = page.GetText();
+			string text = tes.GetOsdText();
+			
 			Console.WriteLine(text);
 			
 		}
