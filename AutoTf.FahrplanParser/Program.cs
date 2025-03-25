@@ -16,6 +16,8 @@ internal static class Program
 		// We can't just go by hektometer keys, because hektometers might repeat
 		List<KeyValuePair<string, string>> speedChanges = new List<KeyValuePair<string, string>>();
 
+		Dictionary<string, RowContent> rows = new Dictionary<string, RowContent>();
+
 		int fileIndex = 0;
 		List<string> files = Directory.GetFiles("FahrplanData/").ToList();
 		files.Sort();
@@ -97,8 +99,6 @@ internal static class Program
 				new Rectangle(85, 705, 1165, 44),
 				new Rectangle(85, 750, 1165, 44),
 			};
-
-			Dictionary<string, RowContent> rows = new Dictionary<string, RowContent>();
 
 			rowsRoi.Reverse();
 
@@ -212,11 +212,7 @@ internal static class Program
 						
 						if (rows.Any())
 						{
-							List<KeyValuePair<string,RowContent>> stations = rows.TakeLast(3).Where(x => x.Value.GetType() == typeof(Station)).ToList();
-							foreach (KeyValuePair<string,RowContent> stationtest in stations)
-							{
-								Console.WriteLine($"Checking against {stationtest.Key} and {((Station)stationtest.Value).Name}");
-							}
+							List<KeyValuePair<string, RowContent>> stations = rows.Where(x => x.Value is Station).ToList();
 							if(!stations.All(x => ((Station)x.Value).Arrival == arrivalTime && ((Station)x.Value).Name == additionalText))
 								content = station;
 						}
