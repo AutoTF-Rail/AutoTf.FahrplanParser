@@ -118,7 +118,7 @@ internal static class Program
 				string departureTime = ExtractText(departureRoi, mat).Replace("\n", "").Trim();
 
 				Rectangle additionalTextRoi = new Rectangle(row.X + 377, row.Y, 474, 44);
-				string additionalText = ExtractText(additionalTextRoi, mat);
+				string additionalText = ExtractText(additionalTextRoi, mat).Trim();
 				
 				if (string.IsNullOrWhiteSpace(hektoMeter))
 				{
@@ -141,16 +141,16 @@ internal static class Program
 					{
 						additionalContent.Add(new Station()
 						{
-							Name = additionalText.Trim(),
+							Name = additionalText,
 							Arrival = arrivalTime,
 							Departure = departureTime
 						});
 						
-						Console.WriteLine($"Added station {additionalText.Trim()} at {hektoMeter}.");
+						Console.WriteLine($"Added station {additionalText} at {hektoMeter}.");
 					}
 					else if (additionalText.Contains("GSM-R"))
 					{
-						additionalContent.Add(new GSMRInfo(additionalText.Trim()));
+						additionalContent.Add(new GSMRInfo(additionalText));
 					}
 					else if (additionalText.Contains("Asig"))
 					{
@@ -202,13 +202,22 @@ internal static class Program
 					
 					if (!string.IsNullOrWhiteSpace(arrivalTime) && !string.IsNullOrWhiteSpace(departureTime))
 					{
-						content = new Station()
+						Station station = new Station()
 						{
-							Name = additionalText.Trim(),
+							Name = additionalText,
 							Arrival = arrivalTime,
 							Departure = departureTime,
 							AdditionalContent = additionalContent
 						};
+						
+						if (rows.Any())
+						{
+							if(rows.TakeLast(3).Where(x => x.Value.GetType() == typeof(Stack<>)).All(
+								   x => ((Station)x.Value).Arrival != arrivalTime && ((Station)x.Value).Name != additionalText))
+								content = station;
+						}
+						else
+							content = station;
 						
 						Console.WriteLine($"Added station {additionalText.Trim()} at {hektoMeter}.");
 					}
@@ -257,6 +266,8 @@ internal static class Program
 		{
 			Console.WriteLine($"Speed change to {speedChange.Value} at {speedChange.Key}");
 		}
+		
+		
 		
 		_engine.Dispose();
 	}
