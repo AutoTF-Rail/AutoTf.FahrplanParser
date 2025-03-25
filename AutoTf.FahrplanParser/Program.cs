@@ -29,8 +29,13 @@ internal static class Program
 		
 			Console.WriteLine($"Train Number: {ExtractText(trainNumRoi, mat)}");
 			Console.WriteLine($"Plan is{(ExtractText(planValidityRoi, mat).Contains("gültig") ? "" : " not")} valid.");
+			
 			string nextStop = ExtractText(nextStopRoi, mat);
-			string newNextStop = nextStop.Split("alt: ")[1];
+			string newNextStop = string.Empty;
+			
+			if(!string.IsNullOrEmpty(nextStop))
+				newNextStop = nextStop.Split("alt: ")[1];
+			
 			Console.WriteLine($"Next stop: {newNextStop}");
 			Console.WriteLine($"Current speed limit: {ExtractText(currSpeedLimitRoi, mat)}");
 		
