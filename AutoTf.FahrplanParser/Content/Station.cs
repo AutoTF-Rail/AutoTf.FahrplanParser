@@ -1,4 +1,4 @@
-namespace AutoTf.FahrplanParser;
+namespace AutoTf.FahrplanParser.Content;
 
 public class Station : RowContent
 {
