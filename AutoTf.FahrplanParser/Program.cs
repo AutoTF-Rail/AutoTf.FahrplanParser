@@ -32,12 +32,12 @@ internal static class Program
 				
 				Rectangle delayRoi = new Rectangle(696, 812, 134, 30);
 				
-				Console.WriteLine($"Date: {ExtractText(dateRoi, mat)} - {ExtractText(timeRoi, mat)}");
+				Console.WriteLine($"Date: {ExtractText(dateRoi, mat).Replace("\n", "")} - {ExtractText(timeRoi, mat).Replace("\n", "")}");
 		
 				Console.WriteLine($"Train Number: {ExtractText(trainNumRoi, mat)}");
 				Console.WriteLine($"Plan is{(ExtractText(planValidityRoi, mat).Contains("gültig") ? "" : " not")} valid.\n");
 				
-				Console.WriteLine($"Current delay: {ExtractText(delayRoi, mat)}.");
+				Console.WriteLine($"Current delay: {ExtractText(delayRoi, mat).Replace("\n", "")}.");
 				
 				
 				// Does this maybe make a problem, if we are already on "page two" by location, so the point won't be on the first page?
@@ -72,7 +72,7 @@ internal static class Program
 						continue;
 
 					string location = ExtractText(locationPointHektometerRois[i], mat).TrimEnd();
-					Console.WriteLine($"Estimated location: {location}");
+					Console.WriteLine($"Estimated location: {location}.\n\n");
 					break;
 				}
 			}
@@ -237,7 +237,7 @@ internal static class Program
 		
 		Console.WriteLine($"Finished at {DateTime.Now.ToString("mm:ss.fff")}");
 		
-		Console.WriteLine(Environment.NewLine + Environment.NewLine + Environment.NewLine);
+		Console.WriteLine(Environment.NewLine + Environment.NewLine);
 
 		foreach (KeyValuePair<string,string> speedChange in speedChanges)
 		{
