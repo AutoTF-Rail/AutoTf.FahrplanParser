@@ -101,9 +101,7 @@ internal static class Program
 		int whitePixels = CvInvoke.CountNonZero(binaryImg);
 		int totalPixels = img.Rows * img.Cols;
 		int blackPixels = totalPixels - whitePixels;
-
-		Console.WriteLine("Total white: " + whitePixels);
-		Console.WriteLine("Total black: " + blackPixels);
+		
 		binaryImg.Dispose();
 		return blackPixels > whitePixels;
 	}
