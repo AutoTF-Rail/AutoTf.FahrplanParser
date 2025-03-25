@@ -12,7 +12,8 @@ internal static class Program
 		Console.WriteLine("AutoTF Fahrplan Parser");
 		Console.WriteLine($"Started at {DateTime.Now.ToString("mm:ss.fff")}");
 		
-		Dictionary<string, string> speedChanges = new Dictionary<string, string>();
+		// We can't just go by hektometer keys, because hektometers might repeat
+		List<KeyValuePair<string, string>> speedChanges = new List<KeyValuePair<string, string>>();
 
 		int fileIndex = 0;
 		List<string> files = Directory.GetFiles("FahrplanData/").ToList();
@@ -163,10 +164,10 @@ internal static class Program
 						{
 							Console.WriteLine($"Last change: {speedChanges.Last().Value} at {speedChanges.Last().Key}.");
 							if(speedChanges.Last().Value != speedlimit)
-								speedChanges.Add(hektoMeter, speedlimit);
+								speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedlimit));
 						}
 						else 
-							speedChanges.Add(hektoMeter, speedlimit);
+							speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedlimit));
 						
 						Console.WriteLine("Got speed limit: " + speedlimit + " at " + hektoMeter);
 						
