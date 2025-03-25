@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using AutoTf.FahrplanParser;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.OCR;
@@ -26,14 +27,17 @@ internal static class Program
 				Rectangle dateRoi = new Rectangle(805, 11, 190, 44);
 				Rectangle timeRoi = new Rectangle(1066, 11, 160, 44);
 				
-				Console.WriteLine($"Date: {ExtractText(dateRoi, mat)}");
-				Console.WriteLine($"Time: {ExtractText(timeRoi, mat)}\n");
+				Rectangle delayRoi = new Rectangle(696, 812, 134, 30);
+				
+				Console.WriteLine($"Date: {ExtractText(dateRoi, mat)} - {ExtractText(timeRoi, mat)}");
 		
 				Console.WriteLine($"Train Number: {ExtractText(trainNumRoi, mat)}");
-				Console.WriteLine($"Plan is{(ExtractText(planValidityRoi, mat).Contains("gültig") ? "" : " not")} valid.");
+				Console.WriteLine($"Plan is{(ExtractText(planValidityRoi, mat).Contains("gültig") ? "" : " not")} valid.\n");
+				
+				Console.WriteLine($"Current delay: {ExtractText(delayRoi, mat)}.");
+				
 				
 				// Does this maybe make a problem, if we are already on "page two" by location, so the point won't be on the first page?
-
 				List<Rectangle> locationPointRois = new List<Rectangle>()
 				{
 					new Rectangle(190, 432, 37, 43),
@@ -64,32 +68,144 @@ internal static class Program
 					if(!IsMoreBlackThanWhite(checkMat))
 						continue;
 
-					string location = ExtractText(locationPointHektometerRois[i], mat);
-					Console.WriteLine($"Found location marker at {location}.");
+					string location = ExtractText(locationPointHektometerRois[i], mat).TrimEnd();
+					Console.WriteLine($"Estimated location: {location}");
 					break;
 				}
 			}
 
 			fileIndex++;
 
-			Rectangle nextStopRoi = new Rectangle(726, 67, 524, 33);
-			Rectangle currSpeedLimitRoi = new Rectangle(124, 750, 76, 36);
+			List<Rectangle> rowsRoi = new List<Rectangle>()
+			{
+				new Rectangle(85, 109, 1165, 44),
+				new Rectangle(85, 155, 1165, 44),
+				new Rectangle(85, 201, 1165, 44),
+				new Rectangle(85, 248, 1165, 44),
+				new Rectangle(85, 294, 1165, 44),
+				new Rectangle(85, 340, 1165, 44),
+				new Rectangle(85, 385, 1165, 44),
+				new Rectangle(85, 432, 1165, 44),
+				new Rectangle(85, 477, 1165, 44),
+				new Rectangle(85, 523, 1165, 44),
+				new Rectangle(85, 568, 1165, 44),
+				new Rectangle(85, 614, 1165, 44),
+				new Rectangle(85, 659, 1165, 44),
+				new Rectangle(85, 705, 1165, 44),
+				new Rectangle(85, 750, 1165, 44),
+			};
+
+			Dictionary<string, RowContent> rows = new Dictionary<string, RowContent>();
+
+			rowsRoi.Reverse();
+
+			int previousSpeedLimit = 0;
+
+			List<RowContent> additionalContent = new List<RowContent>();
+
+			for (int i = 0; i < rowsRoi.Count; i++)
+			{
+				Rectangle row = rowsRoi[i];
+				string hektoMeter = GetHektometerFromRow(rowsRoi, i, mat);
+				
+				// We have additional content:
+				if (string.IsNullOrWhiteSpace(hektoMeter))
+				{
+					// Add the current info to the next hektometer we see
+					
+					// Does the last information even matter, or can we safely skip this?
+					if(i == rowsRoi.Count)
+						continue;
+
+					Rectangle speedLimitRoi = new Rectangle(row.X + 50, row.Y, 70, 44);
+
+					string speedlimit = ExtractText(speedLimitRoi, mat);
+					if (!string.IsNullOrWhiteSpace(speedlimit))
+					{
+						additionalContent.Add(new SpeedContent(speedlimit.Trim()));
+					}
+
+					Rectangle additionalTextRoi = new Rectangle(row.X + 377, row.Y, 1165, 44);
+					string additionalText = ExtractText(additionalTextRoi, mat);
+
+					if (additionalText.Contains("GSM-R"))
+					{
+						additionalContent.Add(new GSMRInfo(additionalText.Trim()));
+					}
+					else if (additionalText.Contains("Asig"))
+					{
+						additionalContent.Add(new Asig());
+					}
+					else
+					{
+						// TODO: Continue cases
+						additionalContent.Add(new UnknownContent(additionalText));
+					}
+					continue;
+				}
+				else
+				{
+					Rectangle additionalTextRoi = new Rectangle(row.X + 377, row.Y, 1165, 44);
+					string additionalText = ExtractText(additionalTextRoi, mat);
+
+					if (additionalText.Contains("Hbf"))
+					{
+						rows.Add(hektoMeter, new Station()
+						{
+							Name = additionalText.Trim(),
+							Arrival = "Test",
+							Departure = "Test",
+							AdditionalContent = additionalContent
+						});
+						Console.WriteLine($"Added station {additionalText.Trim()} at {hektoMeter}.");
+					}
+					else if (additionalText.Contains("GSM-R"))
+					{
+						rows.Add(hektoMeter, new GSMRInfo(additionalText.Trim())
+						{
+							AdditionalContent = additionalContent
+						});
+					}
+					else if (additionalText.Contains("Asig"))
+					{
+						rows.Add(hektoMeter, new Asig()
+						{
+							AdditionalContent = additionalContent
+						});
+					}
+					else
+					{
+						// TODO: Continue cases
+						rows.Add(hektoMeter, new UnknownContent(additionalText)
+						{
+							AdditionalContent = additionalContent
+						});
+					}
+					
+					additionalContent.Clear();
+					continue;
+				}
+			}
+
+
 			
-			string nextStop = ExtractText(nextStopRoi, mat);
-			string newNextStop = string.Empty;
-			
-			if(!string.IsNullOrEmpty(nextStop))
-				newNextStop = nextStop.Split("alt: ")[1];
-			
-			Console.WriteLine($"Next stop: {newNextStop}");
-			Console.WriteLine($"Current speed limit: {ExtractText(currSpeedLimitRoi, mat)}");
-		
-			Console.WriteLine($"Finished at {DateTime.Now.ToString("mm:ss.fff")}");
-		
-			mat.Dispose();
 		}
 		
 		_engine.Dispose();
+	}
+
+	private static string GetHektometerFromRow(List<Rectangle> rows, int index, Mat mat)
+	{
+		Rectangle hektoRoi = new Rectangle(rows[index].X + 173, rows[index].Y, 126, 44);
+		string hektoMeter = ExtractText(hektoRoi, mat);
+		//
+		// if (string.IsNullOrWhiteSpace(hektoMeter))
+		// {
+		// 	// Hat die letzte reihe im fahrplan IMMER ein hektometer?
+		// 	return GetHektometerFromRow(rows, index + 1, mat);
+		// }
+
+		return hektoMeter;
 	}
 	
 	static bool IsMoreBlackThanWhite(Mat img)
@@ -115,4 +231,20 @@ internal static class Program
 		
 		return _engine.GetUTF8Text();
 	}
+	
+	// Rectangle nextStopRoi = new Rectangle(726, 67, 524, 33);
+	// Rectangle currSpeedLimitRoi = new Rectangle(124, 750, 76, 36);
+	//
+	// string nextStop = ExtractText(nextStopRoi, mat);
+	// string newNextStop = string.Empty;
+	//
+	// if(!string.IsNullOrEmpty(nextStop))
+	// 	newNextStop = nextStop.Split("alt: ")[1];
+	//
+	// Console.WriteLine($"Next stop: {newNextStop}");
+	// Console.WriteLine($"Current speed limit: {ExtractText(currSpeedLimitRoi, mat)}");
+	//
+	// Console.WriteLine($"Finished at {DateTime.Now.ToString("mm:ss.fff")}");
+	//
+	// mat.Dispose();
 }
