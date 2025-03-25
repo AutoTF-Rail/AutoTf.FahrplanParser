@@ -121,7 +121,7 @@ internal static class Program
 					if(i == rowsRoi.Count)
 						continue;
 
-					Rectangle speedLimitRoi = new Rectangle(row.X + 50, row.Y, 70, 44);
+					Rectangle speedLimitRoi = new Rectangle(row.X + 50, row.Y, 59, 44);
 
 					string speedlimit = ExtractText(speedLimitRoi, mat);
 					if (!string.IsNullOrWhiteSpace(speedlimit))
@@ -155,7 +155,7 @@ internal static class Program
 
 					RowContent? content = null;
 					
-					Rectangle speedLimitRoi = new Rectangle(row.X + 50, row.Y, 70, 44);
+					Rectangle speedLimitRoi = new Rectangle(row.X + 50, row.Y, 59, 44);
 					string speedlimit = ExtractText(speedLimitRoi, mat).Trim();
 					
 					if (!string.IsNullOrWhiteSpace(speedlimit))
