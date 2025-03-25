@@ -26,13 +26,13 @@
       <None Update="FahrplanData\FahrplanPart3.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+      <None Update="FahrplanData\FahrplanPart6.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
       <None Update="FahrplanData\FahrplanPart4.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
       <None Update="FahrplanData\FahrplanPart5.png">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-      <None Update="FahrplanData\FahrplanPart6.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
       <None Update="FahrplanData\FahrplanPart7.png">
