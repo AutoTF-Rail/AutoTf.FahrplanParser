@@ -270,7 +270,7 @@ internal static class Program
 	private static string GetHektometerFromRow(List<Rectangle> rows, int index, Mat mat)
 	{
 		Rectangle hektoRoi = new Rectangle(rows[index].X + 173, rows[index].Y, 126, 44);
-		string hektoMeter = ExtractText(hektoRoi, mat);
+		string hektoMeter = ExtractText(hektoRoi, mat).Replace("\n", "");
 		//
 		// if (string.IsNullOrWhiteSpace(hektoMeter))
 		// {
