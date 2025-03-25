@@ -243,19 +243,23 @@ internal static class Program
 	public static bool ContainsYellow(Rectangle roi, Mat mat)
 	{
 		Mat roiMat = new Mat(mat, roi);
+		Console.WriteLine("Yellow check at: " + roi);
 
 		Mat hsv = new Mat();
 		CvInvoke.CvtColor(roiMat, hsv, ColorConversion.Bgr2Hsv);
 
-		ScalarArray lowerYellow = new ScalarArray(new MCvScalar(20, 100, 100));
-		ScalarArray upperYellow = new ScalarArray(new MCvScalar(30, 255, 255));
+		ScalarArray lowerYellow = new ScalarArray(new MCvScalar(25, 100, 100));
+		ScalarArray upperYellow = new ScalarArray(new MCvScalar(35, 255, 255));
 
 		Mat mask = new Mat();
 		CvInvoke.InRange(hsv, lowerYellow, upperYellow, mask);
 
 		int nonZeroCount = CvInvoke.CountNonZero(mask);
 
-		int threshold = roi.Width * roi.Height / 25;
+		int threshold = roi.Width * roi.Height / 20;
+		
+		Console.WriteLine("Non zero: " + nonZeroCount);
+		Console.WriteLine("Threshold: " + threshold);
 
 		return nonZeroCount > threshold;
 	}
