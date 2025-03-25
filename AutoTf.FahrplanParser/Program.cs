@@ -139,14 +139,14 @@ internal static class Program
 					
 					if (!string.IsNullOrWhiteSpace(arrivalTime) && !string.IsNullOrWhiteSpace(departureTime))
 					{
+						// TODO: This doesn't avoid duplicates, we need to check every additional content to ensure this station hasn't already been added.
+						// Or we keep a seperate list? Like the speed pretty much, we add it on the next known hektometer
 						additionalContent.Add(new Station()
 						{
 							Name = additionalText,
 							Arrival = arrivalTime,
 							Departure = departureTime
 						});
-						
-						Console.WriteLine($"Added station {additionalText} at {hektoMeter}.");
 					}
 					else if (additionalText.Contains("GSM-R"))
 					{
@@ -226,8 +226,6 @@ internal static class Program
 						{
 							AdditionalContent = additionalContent
 						};
-						
-						Console.WriteLine($"Added GSM-R Info {additionalText.Trim()} at {hektoMeter}.");
 					}
 					else if (additionalText.Contains("Asig"))
 					{
@@ -235,8 +233,6 @@ internal static class Program
 						{
 							AdditionalContent = additionalContent
 						};
-						
-						Console.WriteLine($"Added Asig {additionalText.Trim()} at {hektoMeter}.");
 					}
 					else
 					{
