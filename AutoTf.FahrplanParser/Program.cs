@@ -170,31 +170,8 @@ internal static class Program
 							{
 								Console.WriteLine(
 									$"Last change: {speedChanges.Last().Value} at {speedChanges.Last().Key}.");
-								int checkCount = 3;
-								if (speedChanges.Count >= checkCount)
-								{
-									bool isDuplicate = true;
-									for (int x = 1; x < checkCount; x++)
-									{
-										if (speedChanges[speedChanges.Count - x].Value != speedChanges[speedChanges.Count - (x + 1)].Value)
-										{
-											isDuplicate = false;
-											break;
-										}
-									}
-    
-									if (!isDuplicate && speedChanges.Last().Value != speedlimit)
-									{
-										speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedlimit));
-									}
-								}
-								else
-								{
-									if (speedChanges.Last().Value != speedlimit)
-									{
-										speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedlimit));
-									}
-								}
+								if(speedChanges.TakeLast(3).Any(x => x.Key == hektoMeter))
+									speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedlimit));
 							}
 							else
 								speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedlimit));
