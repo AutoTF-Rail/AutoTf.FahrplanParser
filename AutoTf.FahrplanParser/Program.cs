@@ -158,6 +158,7 @@ internal static class Program
 
 					string speedLimit;
 
+					// TODO: Rather make a "starting speed limit"?
 					if (additionalSpeed != string.Empty)
 					{
 						speedLimit = additionalSpeed;
@@ -175,12 +176,10 @@ internal static class Program
 						
 						if (!ContainsYellow(yellowRoi, mat))
 						{
-							// Skip if yellow
+							// Skip if yellow (repeating)
 							// Skip if already contained
 							if (speedChanges.Any())
 							{
-								Console.WriteLine(
-									$"Last change: {speedChanges.Last().Value} at {speedChanges.Last().Key}.");
 								if(speedChanges.TakeLast(3).All(x => x.Key != hektoMeter))
 									speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedLimit));
 							}
