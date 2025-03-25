@@ -120,6 +120,9 @@ internal static class Program
 				Rectangle additionalTextRoi = new Rectangle(row.X + 377, row.Y, 474, 44);
 				string additionalText = ExtractText(additionalTextRoi, mat).Trim();
 				
+				Rectangle speedLimitRoi = new Rectangle(row.X + 50, row.Y, 59, 44);
+				Rectangle yellowRoi = new Rectangle(row.X + 74, row.Y, 35, 9);
+				
 				if (string.IsNullOrWhiteSpace(hektoMeter))
 				{
 					// Add the current info to the next hektometer we see
@@ -128,12 +131,13 @@ internal static class Program
 					if(i == rowsRoi.Count)
 						continue;
 
-					Rectangle speedLimitRoi = new Rectangle(row.X + 50, row.Y, 59, 44);
-
 					string speedlimit = ExtractText(speedLimitRoi, mat);
 					if (!string.IsNullOrWhiteSpace(speedlimit))
 					{
-						additionalSpeed = speedlimit.Trim();
+						if (!ContainsYellow(yellowRoi, mat))
+						{
+							additionalSpeed = speedlimit.Trim();
+						}
 					}
 
 					
@@ -177,14 +181,11 @@ internal static class Program
 					}
 					else
 					{
-						Rectangle speedLimitRoi = new Rectangle(row.X + 50, row.Y, 59, 44);
 						speedLimit = ExtractText(speedLimitRoi, mat).Trim();
 					}
 					
 					if (!string.IsNullOrWhiteSpace(speedLimit))
 					{
-						Rectangle yellowRoi = new Rectangle(row.X + 74, row.Y, 35, 9);
-						
 						if (!ContainsYellow(yellowRoi, mat))
 						{
 							// Skip if yellow (repeating)
