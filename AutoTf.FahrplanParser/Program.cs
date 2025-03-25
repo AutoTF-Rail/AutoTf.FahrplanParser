@@ -106,6 +106,7 @@ internal static class Program
 			int previousSpeedLimit = 0;
 
 			List<RowContent> additionalContent = new List<RowContent>();
+			string additionalSpeed = string.Empty;
 
 			for (int i = 0; i < rowsRoi.Count; i++)
 			{
@@ -127,7 +128,7 @@ internal static class Program
 					string speedlimit = ExtractText(speedLimitRoi, mat);
 					if (!string.IsNullOrWhiteSpace(speedlimit))
 					{
-						additionalContent.Add(new SpeedContent(speedlimit.Trim()));
+						additionalSpeed = speedlimit.Trim();
 					}
 
 					Rectangle additionalTextRoi = new Rectangle(row.X + 377, row.Y, 474, 44);
@@ -154,11 +155,21 @@ internal static class Program
 					string additionalText = ExtractText(additionalTextRoi, mat);
 
 					RowContent? content = null;
+
+					string speedLimit;
+
+					if (additionalSpeed != string.Empty)
+					{
+						speedLimit = additionalSpeed;
+						additionalSpeed = string.Empty;
+					}
+					else
+					{
+						Rectangle speedLimitRoi = new Rectangle(row.X + 50, row.Y, 59, 44);
+						speedLimit = ExtractText(speedLimitRoi, mat).Trim();
+					}
 					
-					Rectangle speedLimitRoi = new Rectangle(row.X + 50, row.Y, 59, 44);
-					string speedlimit = ExtractText(speedLimitRoi, mat).Trim();
-					
-					if (!string.IsNullOrWhiteSpace(speedlimit))
+					if (!string.IsNullOrWhiteSpace(speedLimit))
 					{
 						Rectangle yellowRoi = new Rectangle(row.X + 74, row.Y, 35, 9);
 						
@@ -171,10 +182,10 @@ internal static class Program
 								Console.WriteLine(
 									$"Last change: {speedChanges.Last().Value} at {speedChanges.Last().Key}.");
 								if(speedChanges.TakeLast(3).All(x => x.Key != hektoMeter))
-									speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedlimit));
+									speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedLimit));
 							}
 							else
-								speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedlimit));
+								speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedLimit));
 						}
 
 					}
