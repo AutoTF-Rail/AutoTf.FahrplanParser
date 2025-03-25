@@ -12,7 +12,9 @@ internal static class Program
 		Console.WriteLine($"Started at {DateTime.Now.ToString("mm:ss.fff")}");
 
 		int fileIndex = 0;
-		foreach (string file in Directory.GetFiles("FahrplanData/"))
+		List<string> files = Directory.GetFiles("FahrplanData/").ToList();
+		files.Sort();
+		foreach (string file in files)
 		{
 			Console.WriteLine($"Reading {file}");
 			Mat mat = CvInvoke.Imread(file);
