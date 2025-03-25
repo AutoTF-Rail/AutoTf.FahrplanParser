@@ -223,7 +223,7 @@ internal static class Program
 						else
 							content = station;
 						
-						Console.WriteLine($"Added station {additionalText.Trim()} at {hektoMeter}.");
+						Console.WriteLine($"Added station {additionalText.Trim()} at {hektoMeter}. Arrival {arrivalTime} Depature: {departureTime}");
 					}
 					else if (additionalText.Contains("GSM-R"))
 					{
