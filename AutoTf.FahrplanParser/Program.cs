@@ -171,7 +171,7 @@ internal static class Program
 							{
 								Console.WriteLine(
 									$"Last change: {speedChanges.Last().Value} at {speedChanges.Last().Key}.");
-								if (speedChanges.Last().Value != speedlimit)
+								if (speedChanges.Last().Key != hektoMeter)
 									speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedlimit));
 							}
 							else
