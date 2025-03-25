@@ -96,6 +96,7 @@ internal static class Program
 			};
 
 			Dictionary<string, RowContent> rows = new Dictionary<string, RowContent>();
+			Dictionary<string, string> speedChanges = new Dictionary<string, string>();
 
 			rowsRoi.Reverse();
 
@@ -152,6 +153,23 @@ internal static class Program
 
 					RowContent? content = null;
 					
+					Rectangle speedLimitRoi = new Rectangle(row.X + 50, row.Y, 70, 44);
+					string speedlimit = ExtractText(speedLimitRoi, mat).Trim();
+					
+					if (!string.IsNullOrWhiteSpace(speedlimit))
+					{
+						if (speedChanges.Any())
+						{
+							if(speedChanges.Last().Value != speedlimit)
+								speedChanges.Add(hektoMeter, speedlimit);
+						}
+						else 
+							speedChanges.Add(hektoMeter, speedlimit);
+						
+						Console.WriteLine("Got speed limit: " + speedlimit + " at " + hektoMeter);
+						
+					}
+					
 					if (additionalText.Contains("Hbf"))
 					{
 						content = new Station()
@@ -189,7 +207,6 @@ internal static class Program
 						{
 							AdditionalContent = additionalContent
 						};
-						Console.WriteLine($"Added unknown content {additionalText.Trim()} at {hektoMeter}.");
 					}
 					
 					if (rows.ContainsKey(hektoMeter))
@@ -202,7 +219,10 @@ internal static class Program
 				}
 			}
 
-
+			foreach (KeyValuePair<string,string> speedChange in speedChanges)
+			{
+				Console.WriteLine($"Speed change to {speedChange.Value} at {speedChange.Key}");
+			}
 			
 		}
 		
