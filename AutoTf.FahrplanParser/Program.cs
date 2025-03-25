@@ -11,6 +11,8 @@ internal static class Program
 	{
 		Console.WriteLine("AutoTF Fahrplan Parser");
 		Console.WriteLine($"Started at {DateTime.Now.ToString("mm:ss.fff")}");
+		
+		Dictionary<string, string> speedChanges = new Dictionary<string, string>();
 
 		int fileIndex = 0;
 		List<string> files = Directory.GetFiles("FahrplanData/").ToList();
@@ -96,7 +98,6 @@ internal static class Program
 			};
 
 			Dictionary<string, RowContent> rows = new Dictionary<string, RowContent>();
-			Dictionary<string, string> speedChanges = new Dictionary<string, string>();
 
 			rowsRoi.Reverse();
 
@@ -219,12 +220,11 @@ internal static class Program
 					continue;
 				}
 			}
+		}
 
-			foreach (KeyValuePair<string,string> speedChange in speedChanges)
-			{
-				Console.WriteLine($"Speed change to {speedChange.Value} at {speedChange.Key}");
-			}
-			
+		foreach (KeyValuePair<string,string> speedChange in speedChanges)
+		{
+			Console.WriteLine($"Speed change to {speedChange.Value} at {speedChange.Key}");
 		}
 		
 		_engine.Dispose();
