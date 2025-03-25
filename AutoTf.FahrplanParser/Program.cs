@@ -259,13 +259,13 @@ internal static class Program
 
 		foreach (KeyValuePair<string,string> speedChange in speedChanges)
 		{
-			Console.WriteLine($"Speed change to {speedChange.Value} at {speedChange.Key}");
+			Console.WriteLine($"[{speedChange.Key}] Speed change {speedChange.Value}");
 		}
 		
 		foreach (KeyValuePair<string, RowContent> station in rows.Where(x => x.Value is Station))
 		{
 			Station stationVar = (Station)station.Value;
-			Console.WriteLine($"[{station.Key}] Stop at {stationVar.Name} at {stationVar.Arrival} and depart at {stationVar.Departure}.");
+			Console.WriteLine($"[{station.Key}] Arrive at {stationVar.Arrival} and depart at {stationVar.Departure} from {stationVar.Name}.");
 		}
 		
 		_engine.Dispose();
