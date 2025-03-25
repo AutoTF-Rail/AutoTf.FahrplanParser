@@ -160,6 +160,7 @@ internal static class Program
 					{
 						if (speedChanges.Any())
 						{
+							Console.WriteLine($"Last change: {speedChanges.Last().Value} at {speedChanges.Last().Key}.");
 							if(speedChanges.Last().Value != speedlimit)
 								speedChanges.Add(hektoMeter, speedlimit);
 						}
