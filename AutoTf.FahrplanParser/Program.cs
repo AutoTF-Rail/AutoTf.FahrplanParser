@@ -212,8 +212,12 @@ internal static class Program
 						
 						if (rows.Any())
 						{
-							if(!rows.TakeLast(3).Where(x => x.Value.GetType() == typeof(Station)).Any(
-								   x => ((Station)x.Value).Arrival == arrivalTime && ((Station)x.Value).Name == additionalText))
+							List<KeyValuePair<string,RowContent>> stations = rows.TakeLast(3).Where(x => x.Value.GetType() == typeof(Station)).ToList();
+							foreach (KeyValuePair<string,RowContent> stationtest in stations)
+							{
+								Console.WriteLine($"Checking against {stationtest.Key} and {((Station)stationtest.Value).Name}");
+							}
+							if(!stations.All(x => ((Station)x.Value).Arrival == arrivalTime && ((Station)x.Value).Name == additionalText))
 								content = station;
 						}
 						else
