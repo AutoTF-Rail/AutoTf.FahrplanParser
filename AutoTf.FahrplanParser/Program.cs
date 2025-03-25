@@ -212,7 +212,7 @@ internal static class Program
 						
 						if (rows.Any())
 						{
-							if(rows.TakeLast(3).Where(x => x.Value.GetType() == typeof(Stack<>)).All(
+							if(rows.TakeLast(3).Where(x => x.Value.GetType() == typeof(Station)).All(
 								   x => ((Station)x.Value).Arrival != arrivalTime && ((Station)x.Value).Name != additionalText))
 								content = station;
 						}
