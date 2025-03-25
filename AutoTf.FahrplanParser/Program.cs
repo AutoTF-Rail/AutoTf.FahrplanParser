@@ -169,6 +169,8 @@ internal static class Program
 						{
 							AdditionalContent = additionalContent
 						};
+						
+						Console.WriteLine($"Added GSM-R Info {additionalText.Trim()} at {hektoMeter}.");
 					}
 					else if (additionalText.Contains("Asig"))
 					{
@@ -176,6 +178,8 @@ internal static class Program
 						{
 							AdditionalContent = additionalContent
 						};
+						
+						Console.WriteLine($"Added Asig {additionalText.Trim()} at {hektoMeter}.");
 					}
 					else
 					{
@@ -184,6 +188,7 @@ internal static class Program
 						{
 							AdditionalContent = additionalContent
 						};
+						Console.WriteLine($"Added unknown content {additionalText.Trim()} at {hektoMeter}.");
 					}
 					
 					if (rows.ContainsKey(hektoMeter))
