@@ -111,7 +111,15 @@ internal static class Program
 				Rectangle hektoRoi = new Rectangle(row.X + 173, row.Y, 126, 44);
 				string hektoMeter = ExtractText(hektoRoi, mat).Replace("\n", "");
 				
-				// We have additional content:
+				Rectangle arrivalRoi = new Rectangle(row.X + 865, row.Y, 155, 44);
+				Rectangle departureRoi = new Rectangle(row.X + 1026, row.Y, 140, 44);
+
+				string arrivalTime = ExtractText(arrivalRoi, mat).Replace("\n", "").Trim();
+				string departureTime = ExtractText(departureRoi, mat).Replace("\n", "").Trim();
+
+				Rectangle additionalTextRoi = new Rectangle(row.X + 377, row.Y, 474, 44);
+				string additionalText = ExtractText(additionalTextRoi, mat);
+				
 				if (string.IsNullOrWhiteSpace(hektoMeter))
 				{
 					// Add the current info to the next hektometer we see
@@ -128,10 +136,19 @@ internal static class Program
 						additionalSpeed = speedlimit.Trim();
 					}
 
-					Rectangle additionalTextRoi = new Rectangle(row.X + 377, row.Y, 474, 44);
-					string additionalText = ExtractText(additionalTextRoi, mat);
-
-					if (additionalText.Contains("GSM-R"))
+					
+					if (!string.IsNullOrWhiteSpace(arrivalTime) && !string.IsNullOrWhiteSpace(departureTime))
+					{
+						additionalContent.Add(new Station()
+						{
+							Name = additionalText.Trim(),
+							Arrival = arrivalTime,
+							Departure = departureTime
+						});
+						
+						Console.WriteLine($"Added station {additionalText.Trim()} at {hektoMeter}.");
+					}
+					else if (additionalText.Contains("GSM-R"))
 					{
 						additionalContent.Add(new GSMRInfo(additionalText.Trim()));
 					}
@@ -148,9 +165,6 @@ internal static class Program
 				}
 				else
 				{
-					Rectangle additionalTextRoi = new Rectangle(row.X + 377, row.Y, 474, 44);
-					string additionalText = ExtractText(additionalTextRoi, mat);
-
 					RowContent? content = null;
 
 					string speedLimit;
@@ -186,13 +200,13 @@ internal static class Program
 
 					}
 					
-					if (additionalText.Contains("Hbf"))
+					if (!string.IsNullOrWhiteSpace(arrivalTime) && !string.IsNullOrWhiteSpace(departureTime))
 					{
 						content = new Station()
 						{
 							Name = additionalText.Trim(),
-							Arrival = "Test",
-							Departure = "Test",
+							Arrival = arrivalTime,
+							Departure = departureTime,
 							AdditionalContent = additionalContent
 						};
 						
