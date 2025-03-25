@@ -1,14 +1,15 @@
 ﻿using System.Drawing;
-using AutoTf.FahrplanParser;
 using AutoTf.FahrplanParser.Content;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.OCR;
 using Emgu.CV.Structure;
 
+namespace AutoTf.FahrplanParser;
+
 internal static class Program
 {
-	public async static Task Main(string[] args)
+	public static async Task Main(string[] args)
 	{
 		Console.WriteLine("AutoTF Fahrplan Parser");
 		Console.WriteLine($"Started at {DateTime.Now.ToString("mm:ss.fff")}");
@@ -53,79 +54,31 @@ internal static class Program
 				
 			if (fileIndex == 0)
 			{
-				Rectangle trainNumRoi = new Rectangle(17, 11, 134, 44);
-				Rectangle planValidityRoi = new Rectangle(348, 11, 259, 44);
-				Rectangle dateRoi = new Rectangle(805, 11, 190, 44);
-				Rectangle timeRoi = new Rectangle(1066, 11, 160, 44);
 					
-				Rectangle delayRoi = new Rectangle(696, 812, 134, 30);
-					
-				Console.WriteLine($"Date: {ExtractText(dateRoi, mat, engine).Replace("\n", "")} - {ExtractText(timeRoi, mat, engine).Replace("\n", "")}");
+				Console.WriteLine($"Date: {ExtractText(RegionMappings.Date, mat, engine).Replace("\n", "")} - {ExtractText(RegionMappings.Time, mat, engine).Replace("\n", "")}");
 			
-				Console.WriteLine($"Train Number: {ExtractText(trainNumRoi, mat, engine)}");
-				Console.WriteLine($"Plan is{(ExtractText(planValidityRoi, mat, engine).Contains("gültig") ? "" : " not")} valid.\n");
+				Console.WriteLine($"Train Number: {ExtractText(RegionMappings.TrainNumber, mat, engine)}");
+				Console.WriteLine($"Plan is{(ExtractText(RegionMappings.PlanValidity, mat, engine).Contains("gültig") ? "" : " not")} valid.\n");
 					
-				Console.WriteLine($"Current delay: {ExtractText(delayRoi, mat, engine).Replace("\n", "")}.");
-					
+				Console.WriteLine($"Current delay: {ExtractText(RegionMappings.Delay, mat, engine).Replace("\n", "")}.");
 					
 				// Does this maybe make a problem, if we are already on "page two" by location, so the point won't be on the first page?
-				List<Rectangle> locationPointRois = new List<Rectangle>()
-				{
-					new Rectangle(190, 432, 37, 43),
-					new Rectangle(190, 477, 37, 43),
-					new Rectangle(190, 523, 37, 43),
-					new Rectangle(190, 568, 37, 43),
-					new Rectangle(190, 614, 37, 43),
-					new Rectangle(190, 659, 37, 43),
-					new Rectangle(190, 705, 37, 43)
-				};
-					
-				List<Rectangle> locationPointHektometerRois = new List<Rectangle>()
-				{
-					new Rectangle(259, 432, 127, 43),
-					new Rectangle(259, 477, 127, 43),
-					new Rectangle(259, 523, 127, 43),
-					new Rectangle(259, 568, 127, 43),
-					new Rectangle(259, 614, 127, 43),
-					new Rectangle(259, 659, 127, 43),
-					new Rectangle(259, 705, 127, 43)
-				};
 
-				for (int i = 0; i < locationPointRois.Count; i++)
+				for (int i = 0; i < RegionMappings.LocationPoints.Count; i++)
 				{
-					Rectangle checkRoi = new Rectangle(locationPointRois[i].X + 25, locationPointRois[i].Y + 10, 6, 25);
+					Rectangle checkRoi = new Rectangle(RegionMappings.LocationPoints[i].X + 25, RegionMappings.LocationPoints[i].Y + 10, 6, 25);
 					Mat checkMat = new Mat(mat, checkRoi);
 						
 					if(!IsMoreBlackThanWhite(checkMat))
 						continue;
 
-					string location = ExtractText(locationPointHektometerRois[i], mat, engine).TrimEnd();
+					string location = ExtractText(RegionMappings.LocationPointsHektometer[i], mat, engine).TrimEnd();
 					Console.WriteLine($"Estimated location: {location}.\n\n");
 					break;
 				}
 			}
 
-			fileIndex++;
-
-			List<Rectangle> rowsRoi = new List<Rectangle>()
-			{
-				new Rectangle(85, 109, 1165, 44),
-				new Rectangle(85, 155, 1165, 44),
-				new Rectangle(85, 201, 1165, 44),
-				new Rectangle(85, 248, 1165, 44),
-				new Rectangle(85, 294, 1165, 44),
-				new Rectangle(85, 340, 1165, 44),
-				new Rectangle(85, 385, 1165, 44),
-				new Rectangle(85, 432, 1165, 44),
-				new Rectangle(85, 477, 1165, 44),
-				new Rectangle(85, 523, 1165, 44),
-				new Rectangle(85, 568, 1165, 44),
-				new Rectangle(85, 614, 1165, 44),
-				new Rectangle(85, 659, 1165, 44),
-				new Rectangle(85, 705, 1165, 44),
-				new Rectangle(85, 750, 1165, 44),
-			};
-
+			List<Rectangle> rowsRoi = new List<Rectangle>(RegionMappings.Rows);
 			rowsRoi.Reverse();
 
 			List<RowContent> additionalContent = new List<RowContent>();
