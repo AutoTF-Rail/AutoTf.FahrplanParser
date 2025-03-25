@@ -106,7 +106,8 @@ internal static class Program
 			for (int i = 0; i < rowsRoi.Count; i++)
 			{
 				Rectangle row = rowsRoi[i];
-				string hektoMeter = GetHektometerFromRow(rowsRoi, i, mat);
+				Rectangle hektoRoi = new Rectangle(row.X + 173, row.Y, 126, 44);
+				string hektoMeter = ExtractText(hektoRoi, mat);
 				
 				// We have additional content:
 				if (string.IsNullOrWhiteSpace(hektoMeter))
@@ -125,7 +126,7 @@ internal static class Program
 						additionalContent.Add(new SpeedContent(speedlimit.Trim()));
 					}
 
-					Rectangle additionalTextRoi = new Rectangle(row.X + 377, row.Y, 1165, 44);
+					Rectangle additionalTextRoi = new Rectangle(row.X + 377, row.Y, 474, 44);
 					string additionalText = ExtractText(additionalTextRoi, mat);
 
 					if (additionalText.Contains("GSM-R"))
