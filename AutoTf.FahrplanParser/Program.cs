@@ -44,235 +44,239 @@ internal static class Program
 
 	private static async Task ProcessFileAsync(string file, int fileIndex, Dictionary<string, RowContent> rows, List<KeyValuePair<string, string>> speedChanges)
 	{
-		using Tesseract engine = new Tesseract("tessdata/", "deu", OcrEngineMode.Default);
+		await Task.Run(() =>
+		{
+
+			using Tesseract engine = new Tesseract("tessdata/", "deu", OcrEngineMode.Default);
+				
+			Mat mat = CvInvoke.Imread(file);
+				
+			if (fileIndex == 0)
+			{
+				Rectangle trainNumRoi = new Rectangle(17, 11, 134, 44);
+				Rectangle planValidityRoi = new Rectangle(348, 11, 259, 44);
+				Rectangle dateRoi = new Rectangle(805, 11, 190, 44);
+				Rectangle timeRoi = new Rectangle(1066, 11, 160, 44);
+					
+				Rectangle delayRoi = new Rectangle(696, 812, 134, 30);
+					
+				Console.WriteLine($"Date: {ExtractText(dateRoi, mat, engine).Replace("\n", "")} - {ExtractText(timeRoi, mat, engine).Replace("\n", "")}");
 			
-		Mat mat = CvInvoke.Imread(file);
-			
-		if (fileIndex == 0)
-		{
-			Rectangle trainNumRoi = new Rectangle(17, 11, 134, 44);
-			Rectangle planValidityRoi = new Rectangle(348, 11, 259, 44);
-			Rectangle dateRoi = new Rectangle(805, 11, 190, 44);
-			Rectangle timeRoi = new Rectangle(1066, 11, 160, 44);
-				
-			Rectangle delayRoi = new Rectangle(696, 812, 134, 30);
-				
-			Console.WriteLine($"Date: {ExtractText(dateRoi, mat, engine).Replace("\n", "")} - {ExtractText(timeRoi, mat, engine).Replace("\n", "")}");
-		
-			Console.WriteLine($"Train Number: {ExtractText(trainNumRoi, mat, engine)}");
-			Console.WriteLine($"Plan is{(ExtractText(planValidityRoi, mat, engine).Contains("gültig") ? "" : " not")} valid.\n");
-				
-			Console.WriteLine($"Current delay: {ExtractText(delayRoi, mat, engine).Replace("\n", "")}.");
-				
-				
-			// Does this maybe make a problem, if we are already on "page two" by location, so the point won't be on the first page?
-			List<Rectangle> locationPointRois = new List<Rectangle>()
-			{
-				new Rectangle(190, 432, 37, 43),
-				new Rectangle(190, 477, 37, 43),
-				new Rectangle(190, 523, 37, 43),
-				new Rectangle(190, 568, 37, 43),
-				new Rectangle(190, 614, 37, 43),
-				new Rectangle(190, 659, 37, 43),
-				new Rectangle(190, 705, 37, 43)
-			};
-				
-			List<Rectangle> locationPointHektometerRois = new List<Rectangle>()
-			{
-				new Rectangle(259, 432, 127, 43),
-				new Rectangle(259, 477, 127, 43),
-				new Rectangle(259, 523, 127, 43),
-				new Rectangle(259, 568, 127, 43),
-				new Rectangle(259, 614, 127, 43),
-				new Rectangle(259, 659, 127, 43),
-				new Rectangle(259, 705, 127, 43)
-			};
-
-			for (int i = 0; i < locationPointRois.Count; i++)
-			{
-				Rectangle checkRoi = new Rectangle(locationPointRois[i].X + 25, locationPointRois[i].Y + 10, 6, 25);
-				Mat checkMat = new Mat(mat, checkRoi);
+				Console.WriteLine($"Train Number: {ExtractText(trainNumRoi, mat, engine)}");
+				Console.WriteLine($"Plan is{(ExtractText(planValidityRoi, mat, engine).Contains("gültig") ? "" : " not")} valid.\n");
 					
-				if(!IsMoreBlackThanWhite(checkMat))
-					continue;
-
-				string location = ExtractText(locationPointHektometerRois[i], mat, engine).TrimEnd();
-				Console.WriteLine($"Estimated location: {location}.\n\n");
-				break;
-			}
-		}
-
-		fileIndex++;
-
-		List<Rectangle> rowsRoi = new List<Rectangle>()
-		{
-			new Rectangle(85, 109, 1165, 44),
-			new Rectangle(85, 155, 1165, 44),
-			new Rectangle(85, 201, 1165, 44),
-			new Rectangle(85, 248, 1165, 44),
-			new Rectangle(85, 294, 1165, 44),
-			new Rectangle(85, 340, 1165, 44),
-			new Rectangle(85, 385, 1165, 44),
-			new Rectangle(85, 432, 1165, 44),
-			new Rectangle(85, 477, 1165, 44),
-			new Rectangle(85, 523, 1165, 44),
-			new Rectangle(85, 568, 1165, 44),
-			new Rectangle(85, 614, 1165, 44),
-			new Rectangle(85, 659, 1165, 44),
-			new Rectangle(85, 705, 1165, 44),
-			new Rectangle(85, 750, 1165, 44),
-		};
-
-		rowsRoi.Reverse();
-
-		List<RowContent> additionalContent = new List<RowContent>();
-		string additionalSpeed = string.Empty;
-
-		for (int i = 0; i < rowsRoi.Count; i++)
-		{
-			Rectangle row = rowsRoi[i];
-			Rectangle hektoRoi = new Rectangle(row.X + 173, row.Y, 126, 44);
-			string hektoMeter = ExtractText(hektoRoi, mat, engine).Replace("\n", "");
-				
-			Rectangle arrivalRoi = new Rectangle(row.X + 865, row.Y, 155, 44);
-			Rectangle departureRoi = new Rectangle(row.X + 1026, row.Y, 140, 44);
-
-			string arrivalTime = ExtractText(arrivalRoi, mat, engine).Replace("\n", "").Trim();
-			string departureTime = ExtractText(departureRoi, mat, engine).Replace("\n", "").Trim();
-
-			Rectangle additionalTextRoi = new Rectangle(row.X + 377, row.Y, 474, 44);
-			string additionalText = ExtractText(additionalTextRoi, mat, engine).Trim();
-				
-			Rectangle speedLimitRoi = new Rectangle(row.X + 50, row.Y, 59, 44);
-			Rectangle yellowRoi = new Rectangle(row.X + 74, row.Y, 35, 9);
-				
-			if (string.IsNullOrWhiteSpace(hektoMeter))
-			{
-				// Add the current info to the next hektometer we see
+				Console.WriteLine($"Current delay: {ExtractText(delayRoi, mat, engine).Replace("\n", "")}.");
 					
-				// Does the last information even matter, or can we safely skip this?
-				if(i == rowsRoi.Count)
-					continue;
-
-				string speedlimit = ExtractText(speedLimitRoi, mat, engine);
-				if (!string.IsNullOrWhiteSpace(speedlimit))
-				{
-					if (!ContainsYellow(yellowRoi, mat))
-					{
-						additionalSpeed = speedlimit.Trim();
-					}
-				}
 					
-				if (!string.IsNullOrWhiteSpace(arrivalTime) && !string.IsNullOrWhiteSpace(departureTime))
+				// Does this maybe make a problem, if we are already on "page two" by location, so the point won't be on the first page?
+				List<Rectangle> locationPointRois = new List<Rectangle>()
 				{
-					// TODO: This doesn't avoid duplicates, we need to check every additional content to ensure this station hasn't already been added.
-					// Or we keep a seperate list? Like the speed pretty much, we add it on the next known hektometer
-					additionalContent.Add(new Station()
-					{
-						Name = additionalText,
-						Arrival = arrivalTime,
-						Departure = departureTime
-					});
-				}
-				else if (additionalText.Contains("GSM-R"))
-				{
-					additionalContent.Add(new GSMRInfo(additionalText));
-				}
-				else if (additionalText.Contains("Asig"))
-				{
-					additionalContent.Add(new Asig());
-				}
-				else
-				{
-					// TODO: Continue cases
-					additionalContent.Add(new UnknownContent(additionalText));
-				}
-				continue;
-			}
-			else
-			{
-				RowContent? content = null;
-
-				string speedLimit;
-
-				// TODO: Rather make a "starting speed limit"?
-				if (additionalSpeed != string.Empty)
-				{
-					speedLimit = additionalSpeed;
-					additionalSpeed = string.Empty;
-				}
-				else
-				{
-					speedLimit = ExtractText(speedLimitRoi, mat, engine).Trim();
-				}
+					new Rectangle(190, 432, 37, 43),
+					new Rectangle(190, 477, 37, 43),
+					new Rectangle(190, 523, 37, 43),
+					new Rectangle(190, 568, 37, 43),
+					new Rectangle(190, 614, 37, 43),
+					new Rectangle(190, 659, 37, 43),
+					new Rectangle(190, 705, 37, 43)
+				};
 					
-				if (!string.IsNullOrWhiteSpace(speedLimit))
+				List<Rectangle> locationPointHektometerRois = new List<Rectangle>()
 				{
-					if (!ContainsYellow(yellowRoi, mat))
-					{
-						// Skip if yellow (repeating)
-						// Skip if already contained
-						if (speedChanges.Any())
-						{
-							if(speedChanges.TakeLast(3).All(x => x.Key != hektoMeter))
-								speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedLimit));
-						}
-						else
-							speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedLimit));
-					}
-				}
-					
-				if (!string.IsNullOrWhiteSpace(arrivalTime) && !string.IsNullOrWhiteSpace(departureTime))
+					new Rectangle(259, 432, 127, 43),
+					new Rectangle(259, 477, 127, 43),
+					new Rectangle(259, 523, 127, 43),
+					new Rectangle(259, 568, 127, 43),
+					new Rectangle(259, 614, 127, 43),
+					new Rectangle(259, 659, 127, 43),
+					new Rectangle(259, 705, 127, 43)
+				};
+
+				for (int i = 0; i < locationPointRois.Count; i++)
 				{
-					Station station = new Station()
-					{
-						Name = additionalText,
-						Arrival = arrivalTime,
-						Departure = departureTime,
-						AdditionalContent = additionalContent
-					};
+					Rectangle checkRoi = new Rectangle(locationPointRois[i].X + 25, locationPointRois[i].Y + 10, 6, 25);
+					Mat checkMat = new Mat(mat, checkRoi);
 						
-					if (rows.Any())
+					if(!IsMoreBlackThanWhite(checkMat))
+						continue;
+
+					string location = ExtractText(locationPointHektometerRois[i], mat, engine).TrimEnd();
+					Console.WriteLine($"Estimated location: {location}.\n\n");
+					break;
+				}
+			}
+
+			fileIndex++;
+
+			List<Rectangle> rowsRoi = new List<Rectangle>()
+			{
+				new Rectangle(85, 109, 1165, 44),
+				new Rectangle(85, 155, 1165, 44),
+				new Rectangle(85, 201, 1165, 44),
+				new Rectangle(85, 248, 1165, 44),
+				new Rectangle(85, 294, 1165, 44),
+				new Rectangle(85, 340, 1165, 44),
+				new Rectangle(85, 385, 1165, 44),
+				new Rectangle(85, 432, 1165, 44),
+				new Rectangle(85, 477, 1165, 44),
+				new Rectangle(85, 523, 1165, 44),
+				new Rectangle(85, 568, 1165, 44),
+				new Rectangle(85, 614, 1165, 44),
+				new Rectangle(85, 659, 1165, 44),
+				new Rectangle(85, 705, 1165, 44),
+				new Rectangle(85, 750, 1165, 44),
+			};
+
+			rowsRoi.Reverse();
+
+			List<RowContent> additionalContent = new List<RowContent>();
+			string additionalSpeed = string.Empty;
+
+			for (int i = 0; i < rowsRoi.Count; i++)
+			{
+				Rectangle row = rowsRoi[i];
+				Rectangle hektoRoi = new Rectangle(row.X + 173, row.Y, 126, 44);
+				string hektoMeter = ExtractText(hektoRoi, mat, engine).Replace("\n", "");
+					
+				Rectangle arrivalRoi = new Rectangle(row.X + 865, row.Y, 155, 44);
+				Rectangle departureRoi = new Rectangle(row.X + 1026, row.Y, 140, 44);
+
+				string arrivalTime = ExtractText(arrivalRoi, mat, engine).Replace("\n", "").Trim();
+				string departureTime = ExtractText(departureRoi, mat, engine).Replace("\n", "").Trim();
+
+				Rectangle additionalTextRoi = new Rectangle(row.X + 377, row.Y, 474, 44);
+				string additionalText = ExtractText(additionalTextRoi, mat, engine).Trim();
+					
+				Rectangle speedLimitRoi = new Rectangle(row.X + 50, row.Y, 59, 44);
+				Rectangle yellowRoi = new Rectangle(row.X + 74, row.Y, 35, 9);
+					
+				if (string.IsNullOrWhiteSpace(hektoMeter))
+				{
+					// Add the current info to the next hektometer we see
+						
+					// Does the last information even matter, or can we safely skip this?
+					if(i == rowsRoi.Count)
+						continue;
+
+					string speedlimit = ExtractText(speedLimitRoi, mat, engine);
+					if (!string.IsNullOrWhiteSpace(speedlimit))
 					{
-						List<KeyValuePair<string, RowContent>> stations = rows.Where(x => x.Value is Station).ToList();
-						if(!stations.Any(x => ((Station)x.Value).Arrival == arrivalTime && ((Station)x.Value).Name == additionalText))
-							content = station;
+						if (!ContainsYellow(yellowRoi, mat))
+						{
+							additionalSpeed = speedlimit.Trim();
+						}
+					}
+						
+					if (!string.IsNullOrWhiteSpace(arrivalTime) && !string.IsNullOrWhiteSpace(departureTime))
+					{
+						// TODO: This doesn't avoid duplicates, we need to check every additional content to ensure this station hasn't already been added.
+						// Or we keep a seperate list? Like the speed pretty much, we add it on the next known hektometer
+						additionalContent.Add(new Station()
+						{
+							Name = additionalText,
+							Arrival = arrivalTime,
+							Departure = departureTime
+						});
+					}
+					else if (additionalText.Contains("GSM-R"))
+					{
+						additionalContent.Add(new GSMRInfo(additionalText));
+					}
+					else if (additionalText.Contains("Asig"))
+					{
+						additionalContent.Add(new Asig());
 					}
 					else
-						content = station;
+					{
+						// TODO: Continue cases
+						additionalContent.Add(new UnknownContent(additionalText));
+					}
+					continue;
+				}
+				else
+				{
+					RowContent? content = null;
+
+					string speedLimit;
+
+					// TODO: Rather make a "starting speed limit"?
+					if (additionalSpeed != string.Empty)
+					{
+						speedLimit = additionalSpeed;
+						additionalSpeed = string.Empty;
+					}
+					else
+					{
+						speedLimit = ExtractText(speedLimitRoi, mat, engine).Trim();
+					}
 						
-				}
-				else if (additionalText.Contains("GSM-R"))
-				{
-					content = new GSMRInfo(additionalText.Trim())
+					if (!string.IsNullOrWhiteSpace(speedLimit))
 					{
-						AdditionalContent = additionalContent
-					};
-				}
-				else if (additionalText.Contains("Asig"))
-				{
-					content = new Asig()
+						if (!ContainsYellow(yellowRoi, mat))
+						{
+							// Skip if yellow (repeating)
+							// Skip if already contained
+							if (speedChanges.Any())
+							{
+								if(speedChanges.TakeLast(3).All(x => x.Key != hektoMeter))
+									speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedLimit));
+							}
+							else
+								speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedLimit));
+						}
+					}
+						
+					if (!string.IsNullOrWhiteSpace(arrivalTime) && !string.IsNullOrWhiteSpace(departureTime))
 					{
-						AdditionalContent = additionalContent
-					};
-				}
-				else
-				{
-					// TODO: Continue cases
-					content = new UnknownContent(additionalText)
+						Station station = new Station()
+						{
+							Name = additionalText,
+							Arrival = arrivalTime,
+							Departure = departureTime,
+							AdditionalContent = additionalContent
+						};
+							
+						if (rows.Any())
+						{
+							List<KeyValuePair<string, RowContent>> stations = rows.Where(x => x.Value is Station).ToList();
+							if(!stations.Any(x => ((Station)x.Value).Arrival == arrivalTime && ((Station)x.Value).Name == additionalText))
+								content = station;
+						}
+						else
+							content = station;
+							
+					}
+					else if (additionalText.Contains("GSM-R"))
 					{
-						AdditionalContent = additionalContent
-					};
+						content = new GSMRInfo(additionalText.Trim())
+						{
+							AdditionalContent = additionalContent
+						};
+					}
+					else if (additionalText.Contains("Asig"))
+					{
+						content = new Asig()
+						{
+							AdditionalContent = additionalContent
+						};
+					}
+					else
+					{
+						// TODO: Continue cases
+						content = new UnknownContent(additionalText)
+						{
+							AdditionalContent = additionalContent
+						};
+					}
+						
+					if (rows.ContainsKey(hektoMeter))
+						rows[hektoMeter].AdditionalContent.Add(content);
+					else
+						rows.Add(hektoMeter, content);
+						
+					additionalContent.Clear();
 				}
-					
-				if (rows.ContainsKey(hektoMeter))
-					rows[hektoMeter].AdditionalContent.Add(content);
-				else
-					rows.Add(hektoMeter, content);
-					
-				additionalContent.Clear();
 			}
-		}
+		});
 	}
 
 	private static bool ContainsYellow(Rectangle roi, Mat mat)
