@@ -124,6 +124,7 @@ internal static class Program
 					if (!string.IsNullOrWhiteSpace(speedlimit))
 					{
 						additionalContent.Add(new SpeedContent(speedlimit.Trim()));
+						Console.WriteLine("Got speed: " + speedlimit);
 					}
 
 					Rectangle additionalTextRoi = new Rectangle(row.X + 377, row.Y, 474, 44);
