@@ -213,13 +213,12 @@ internal static class Program
 						if (rows.Any())
 						{
 							List<KeyValuePair<string, RowContent>> stations = rows.Where(x => x.Value is Station).ToList();
-							if(!stations.All(x => ((Station)x.Value).Arrival == arrivalTime && ((Station)x.Value).Name == additionalText))
+							if(!stations.Any(x => ((Station)x.Value).Arrival == arrivalTime && ((Station)x.Value).Name == additionalText))
 								content = station;
 						}
 						else
 							content = station;
 						
-						Console.WriteLine($"Added station {additionalText.Trim()} at {hektoMeter}. Arrival {arrivalTime} Depature: {departureTime}");
 					}
 					else if (additionalText.Contains("GSM-R"))
 					{
@@ -267,7 +266,11 @@ internal static class Program
 			Console.WriteLine($"Speed change to {speedChange.Value} at {speedChange.Key}");
 		}
 		
-		
+		foreach (KeyValuePair<string, RowContent> station in rows.Where(x => x.Value is Station))
+		{
+			Station stationVar = (Station)station.Value;
+			Console.WriteLine($"[{station.Key}] Stop at {stationVar.Name} at {stationVar.Arrival} and depart at {stationVar.Departure}.");
+		}
 		
 		_engine.Dispose();
 	}
