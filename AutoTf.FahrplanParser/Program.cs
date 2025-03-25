@@ -128,7 +128,6 @@ internal static class Program
 					if (!string.IsNullOrWhiteSpace(speedlimit))
 					{
 						additionalContent.Add(new SpeedContent(speedlimit.Trim()));
-						Console.WriteLine("Got speed: " + speedlimit);
 					}
 
 					Rectangle additionalTextRoi = new Rectangle(row.X + 377, row.Y, 474, 44);
@@ -171,13 +170,34 @@ internal static class Program
 							{
 								Console.WriteLine(
 									$"Last change: {speedChanges.Last().Value} at {speedChanges.Last().Key}.");
-								if (speedChanges.Last().Key != hektoMeter)
-									speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedlimit));
+								int checkCount = 3;
+								if (speedChanges.Count >= checkCount)
+								{
+									bool isDuplicate = true;
+									for (int x = 1; x < checkCount; x++)
+									{
+										if (speedChanges[speedChanges.Count - x].Value != speedChanges[speedChanges.Count - (x + 1)].Value)
+										{
+											isDuplicate = false;
+											break;
+										}
+									}
+    
+									if (!isDuplicate && speedChanges.Last().Value != speedlimit)
+									{
+										speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedlimit));
+									}
+								}
+								else
+								{
+									if (speedChanges.Last().Value != speedlimit)
+									{
+										speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedlimit));
+									}
+								}
 							}
 							else
 								speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedlimit));
-
-							Console.WriteLine("Got speed limit: " + speedlimit + " at " + hektoMeter);
 						}
 
 					}
@@ -243,7 +263,6 @@ internal static class Program
 	public static bool ContainsYellow(Rectangle roi, Mat mat)
 	{
 		Mat roiMat = new Mat(mat, roi);
-		Console.WriteLine("Yellow check at: " + roi);
 
 		Mat hsv = new Mat();
 		CvInvoke.CvtColor(roiMat, hsv, ColorConversion.Bgr2Hsv);
@@ -257,9 +276,6 @@ internal static class Program
 		int nonZeroCount = CvInvoke.CountNonZero(mask);
 
 		int threshold = roi.Width * roi.Height / 20;
-		
-		Console.WriteLine("Non zero: " + nonZeroCount);
-		Console.WriteLine("Threshold: " + threshold);
 
 		return nonZeroCount > threshold;
 	}
