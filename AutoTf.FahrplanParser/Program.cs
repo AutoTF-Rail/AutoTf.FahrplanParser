@@ -22,9 +22,10 @@ internal static class Program
 		List<string> files = Directory.GetFiles("FahrplanData/").ToList();
 		files.Sort();
 		
-		IEnumerable<Task> tasks = files.Select(file => ProcessFileAsync(file, fileIndex++, rows, speedChanges));
-
-		await Task.WhenAll(tasks);
+		foreach (string file in files)
+		{
+			await ProcessFileAsync(file, fileIndex++, rows, speedChanges);
+		}
 		
 		Console.WriteLine($"Finished at {DateTime.Now.ToString("mm:ss.fff")}");
 		
