@@ -1,63 +1,46 @@
 using System.Drawing;
+using AutoTf.FahrplanParser.Content;
 using AutoTf.FahrplanParser.Extensions;
 using Emgu.CV;
 using Emgu.CV.OCR;
 
 namespace AutoTf.FahrplanParser;
 
-public class Parser
+public class Parser : ParserBase
 {
-	private readonly Tesseract _engine;
+	public Parser(Tesseract engine) : base(engine) { }
 
-	public Parser(Tesseract engine)
+	private static string ExtractTextClean(Rectangle roi, Mat mat, Tesseract engine) => ExtractText(roi, mat, engine).Replace("\n", "");
+
+	private static string ExtractText(Rectangle roi, Mat mat, Tesseract engine)
 	{
-		_engine = engine;
+		using Mat roiMat = new Mat(mat, roi);
+		using Pix pix = new Pix(roiMat);
+		
+		engine.SetImage(pix);
+		
+		return engine.GetUTF8Text().Trim();
 	}
 
-	public string Date(Mat mat)
-	{
-		return ExtractTextClean(RegionMappings.Date, mat, _engine).Replace("\n", "");
-	}
+	public string Date(Mat mat) => ExtractTextClean(RegionMappings.Date, mat, Engine).Replace("\n", "");
 
-	public string Time(Mat mat)
-	{
-		return ExtractTextClean(RegionMappings.Time, mat, _engine).Replace("\n", "");
-	}
+	public string Time(Mat mat) => ExtractTextClean(RegionMappings.Time, mat, Engine).Replace("\n", "");
 
-	public string TrainNumber(Mat mat)
-	{
-		return ExtractTextClean(RegionMappings.TrainNumber, mat, _engine).Replace("\n", "");
-	}
+	public string TrainNumber(Mat mat) => ExtractTextClean(RegionMappings.TrainNumber, mat, Engine).Replace("\n", "");
 
-	public string PlanValid(Mat mat)
-	{
-		return ExtractTextClean(RegionMappings.PlanValidity, mat, _engine).Replace("\n", "");
-	}
+	public string PlanValid(Mat mat) => ExtractTextClean(RegionMappings.PlanValidity, mat, Engine).Replace("\n", "");
 
-	public string Delay(Mat mat)
-	{
-		return ExtractTextClean(RegionMappings.Delay, mat, _engine).Replace("\n", "");
-	}
+	public string Delay(Mat mat) => ExtractTextClean(RegionMappings.Delay, mat, Engine).Replace("\n", "");
 
-	public string Hektometer(Mat mat, Rectangle row)
-	{
-		return ExtractTextClean(RegionMappings.Hektometer(row), mat, _engine).Replace("\n", "");
-	}
+	public string Hektometer(Mat mat, Rectangle row) => ExtractTextClean(RegionMappings.Hektometer(row), mat, Engine).Replace("\n", "");
 
-	public string AdditionalText(Mat mat, Rectangle row)
-	{
-		return ExtractTextClean(RegionMappings.AdditionalText(row), mat, _engine).Replace("\n", "");
-	}
+	public string AdditionalText(Mat mat, Rectangle row) => ExtractTextClean(RegionMappings.AdditionalText(row), mat, Engine).Replace("\n", "");
 
-	public string Arrival(Mat mat, Rectangle row)
-	{
-		return ExtractTextClean(RegionMappings.Arrival(row), mat, _engine).Replace("\n", "");
-	}
+	public string Arrival(Mat mat, Rectangle row) => ExtractTextClean(RegionMappings.Arrival(row), mat, Engine).Replace("\n", "");
 
-	public string Departure(Mat mat, Rectangle row)
-	{
-		return ExtractTextClean(RegionMappings.Departure(row), mat, _engine).Replace("\n", "");
-	}
+	public string Departure(Mat mat, Rectangle row) => ExtractTextClean(RegionMappings.Departure(row), mat, Engine).Replace("\n", "");
+
+	public string SpeedLimit(Mat mat, Rectangle row) => ExtractTextClean(RegionMappings.SpeedLimit(row), mat, Engine).Replace("\n", "");
 
 	public string? Location(Mat mat)
 	{
@@ -70,21 +53,9 @@ public class Parser
 			if(!checkMat.IsMoreBlackThanWhite())
 				continue;
 
-			return ExtractText(RegionMappings.LocationPointsHektometer[i], mat, _engine).TrimEnd();
+			return ExtractText(RegionMappings.LocationPointsHektometer[i], mat, Engine).TrimEnd();
 		}
 
 		return null;
 	}
-
-	private static string ExtractText(Rectangle roi, Mat mat, Tesseract engine)
-	{
-		using Mat roiMat = new Mat(mat, roi);
-		using Pix pix = new Pix(roiMat);
-		
-		engine.SetImage(pix);
-		
-		return engine.GetUTF8Text().Trim();
-	}
-
-	private static string ExtractTextClean(Rectangle roi, Mat mat, Tesseract engine) => ExtractText(roi, mat, engine).Replace("\n", "");
 }

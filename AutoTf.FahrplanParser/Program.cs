@@ -8,7 +8,7 @@ namespace AutoTf.FahrplanParser;
 
 internal static class Program
 {
-	public static async Task Main(string[] args)
+	public static Task Main(string[] args)
 	{
 		Console.WriteLine("AutoTF Fahrplan Parser");
 		Console.WriteLine($"Started at {DateTime.Now.ToString("mm:ss.fff")}");
@@ -41,6 +41,8 @@ internal static class Program
 			Station stationVar = (Station)station.Value;
 			Console.WriteLine($"[{station.Key}] Arrive at {stationVar.Arrival} and depart at {stationVar.Departure} from {stationVar.Name}.");
 		}
+
+		return Task.CompletedTask;
 	}
 
 	private static void ProcessFileAsync(string file, int fileIndex, List<KeyValuePair<string, RowContent>> rows, List<KeyValuePair<string, string>> speedChanges)
@@ -84,7 +86,7 @@ internal static class Program
 			if (string.IsNullOrWhiteSpace(hektometer))
 			{
 				// TODO: Does this case ever happen? Having a speed limit change at a unknown hektometer? If not, this can be removed
-				string speedlimit = ExtractTextClean(RegionMappings.SpeedLimit(row), mat, engine);
+				string speedlimit = parser.SpeedLimit(mat, row);
 				
 				if (!string.IsNullOrWhiteSpace(speedlimit))
 				{
@@ -92,9 +94,9 @@ internal static class Program
 						additionalSpeed = speedlimit;
 				}
 
-				RowContent? content = ResolveContent(additionalText, arrivalTime, departureTime);
+				RowContent? content = parser.ResolveContent(additionalText, arrivalTime, departureTime);
 				
-				content = CheckForDuplicateStation(content, arrivalTime, additionalText, rows);
+				content = parser.CheckForDuplicateStation(content, arrivalTime, additionalText, rows);
 				
 				if(content == null)
 					continue;
@@ -116,7 +118,7 @@ internal static class Program
 				}
 				else
 				{
-					speedLimit = ExtractText(RegionMappings.SpeedLimit(row), mat, engine).Trim();
+					speedLimit = parser.SpeedLimit(mat, row);
 				}
 					
 				if (!string.IsNullOrWhiteSpace(speedLimit))
@@ -135,69 +137,15 @@ internal static class Program
 					}
 				}
 
-				RowContent? content = ResolveContent(additionalText, arrivalTime, departureTime);
+				RowContent? content = parser.ResolveContent(additionalText, arrivalTime, departureTime);
 
-				content = CheckForDuplicateStation(content, arrivalTime, additionalText, rows);
+				content = parser.CheckForDuplicateStation(content, arrivalTime, additionalText, rows);
 
 				if (content == null)
 					continue;
 
 				rows.Add(new KeyValuePair<string, RowContent>(hektometer, content));
-				
 			}
 		}
 	}
-
-	private static RowContent? CheckForDuplicateStation(RowContent content, string arrivalTime, string stationName, List<KeyValuePair<string, RowContent>> knownStations)
-	{
-		if (content is not Station station)
-			return null;
-
-		if (knownStations.Count == 0) 
-			return station;
-		
-		List<KeyValuePair<string, RowContent>> stations = knownStations.Where(x => x.Value is Station).ToList();
-
-		return stations.Any(x => x.Value is Station value && 
-		                         value.Arrival == arrivalTime && value.Name == stationName) ? null : station;
-
-	}
-
-	private static RowContent ResolveContent(string additionalText, string arrivalTime, string departureTime)
-	{
-		if (!string.IsNullOrWhiteSpace(arrivalTime) && !string.IsNullOrWhiteSpace(departureTime))
-		{
-			return new Station()
-			{
-				Name = additionalText,
-				Arrival = arrivalTime,
-				Departure = departureTime
-			};
-		}
-
-		if (additionalText.Contains("GSM-R"))
-		{
-			return new GSMRInfo(additionalText.Trim());
-		}
-
-		if (additionalText.Contains("Asig"))
-		{
-			return new Asig();
-		}
-
-		// TODO: Continue cases
-		return new UnknownContent(additionalText);
-	}
-
-	private static string ExtractText(Rectangle roi, Mat mat, Tesseract engine)
-	{
-		using Mat roiMat = new Mat(mat, roi);
-		using Pix pix = new Pix(roiMat);
-		
-		engine.SetImage(pix);
-		
-		return engine.GetUTF8Text().Trim();
-	}
-
-	private static string ExtractTextClean(Rectangle roi, Mat mat, Tesseract engine) => ExtractText(roi, mat, engine).Replace("\n", "");
 }
