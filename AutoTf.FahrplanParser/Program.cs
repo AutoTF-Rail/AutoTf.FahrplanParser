@@ -24,7 +24,7 @@ internal static class Program
 		
 		foreach (string file in files)
 		{
-			await ProcessFileAsync(file, fileIndex++, rows, speedChanges);
+			ProcessFileAsync(file, fileIndex++, rows, speedChanges);
 		}
 		
 		Console.WriteLine($"Finished at {DateTime.Now.ToString("mm:ss.fff")}");
@@ -43,150 +43,124 @@ internal static class Program
 		}
 	}
 
-	private static async Task ProcessFileAsync(string file, int fileIndex, List<KeyValuePair<string, RowContent>> rows, List<KeyValuePair<string, string>> speedChanges)
+	private static void ProcessFileAsync(string file, int fileIndex, List<KeyValuePair<string, RowContent>> rows, List<KeyValuePair<string, string>> speedChanges)
 	{
-		await Task.Run(() =>
+		using Tesseract engine = new Tesseract("tessdata/", "deu", OcrEngineMode.Default);
+		Parser parser = new Parser(engine);
+		
+		Mat mat = CvInvoke.Imread(file);
+			
+		if (fileIndex == 0)
 		{
-			using Tesseract engine = new Tesseract("tessdata/", "deu", OcrEngineMode.Default);
+			Console.WriteLine($"Date: {parser.Date(mat)} - {parser.Time(mat)}");
+			Console.WriteLine($"Train Number: {parser.TrainNumber(mat)}");
+			Console.WriteLine($"Plan is{(parser.PlanValid(mat).Contains("gültig") ? "" : " not")} valid.\n");
+			Console.WriteLine($"Current delay: {parser.Delay(mat)}.");
 				
-			Mat mat = CvInvoke.Imread(file);
-				
-			if (fileIndex == 0)
-			{
-				Console.WriteLine($"Date: {ExtractText(RegionMappings.Date, mat, engine).Replace("\n", "")} - {ExtractText(RegionMappings.Time, mat, engine).Replace("\n", "")}");
+			string? location = parser.Location(mat);
+			if (location == null)
+				Console.WriteLine("Could not find location point.");
+			else 
+				Console.WriteLine($"Estimated location: {location}.\n\n");
+		}
+
+		List<Rectangle> rowsRoi = [..RegionMappings.Rows];
+		rowsRoi.Reverse();
+
+		List<RowContent> additionalContent = new List<RowContent>();
+		
+		string additionalSpeed = string.Empty;
+
+		for (int i = 0; i < rowsRoi.Count; i++)
+		{
+			Rectangle row = rowsRoi[i];
+
+			string hektometer = parser.Hektometer(mat, row);
+			string additionalText = parser.AdditionalText(mat, row);
+			string arrivalTime = parser.Arrival(mat, row);
+			string departureTime = parser.Departure(mat, row);
 			
-				Console.WriteLine($"Train Number: {ExtractText(RegionMappings.TrainNumber, mat, engine)}");
-				Console.WriteLine($"Plan is{(ExtractText(RegionMappings.PlanValidity, mat, engine).Contains("gültig") ? "" : " not")} valid.\n");
-					
-				Console.WriteLine($"Current delay: {ExtractText(RegionMappings.Delay, mat, engine).Replace("\n", "")}.");
-					
-				// Does this maybe make a problem, if we are already on "page two" by location, so the point won't be on the first page?
-
-				for (int i = 0; i < RegionMappings.LocationPoints.Count; i++)
+			// If we don't have a hektometer, we will add it's info to the next one
+			if (string.IsNullOrWhiteSpace(hektometer))
+			{
+				// TODO: Does this case ever happen? Having a speed limit change at a unknown hektometer? If not, this can be removed
+				string speedlimit = ExtractTextClean(RegionMappings.SpeedLimit(row), mat, engine);
+				
+				if (!string.IsNullOrWhiteSpace(speedlimit))
 				{
-					Rectangle checkRoi = new Rectangle(RegionMappings.LocationPoints[i].X + 25, RegionMappings.LocationPoints[i].Y + 10, 6, 25);
-					Mat checkMat = new Mat(mat, checkRoi);
-						
-					if(!checkMat.IsMoreBlackThanWhite())
-						continue;
-
-					string location = ExtractText(RegionMappings.LocationPointsHektometer[i], mat, engine).TrimEnd();
-					Console.WriteLine($"Estimated location: {location}.\n\n");
-					break;
+					if (!mat.ContainsYellow(RegionMappings.YellowArea(row)))
+						additionalSpeed = speedlimit;
 				}
+
+				RowContent? content = ResolveContent(additionalText, arrivalTime, departureTime);
+				
+				content = CheckForDuplicateStation(content, arrivalTime, additionalText, rows);
+				
+				if(content == null)
+					continue;
+					
+				additionalContent.Add(content);
 			}
-
-			List<Rectangle> rowsRoi = new List<Rectangle>(RegionMappings.Rows);
-			rowsRoi.Reverse();
-
-			List<RowContent> additionalContent = new List<RowContent>();
-			
-			string additionalSpeed = string.Empty;
-
-			for (int i = 0; i < rowsRoi.Count; i++)
+			else
 			{
-				Rectangle row = rowsRoi[i];
+				rows.AddRange(additionalContent.Select(x => new KeyValuePair<string, RowContent>(hektometer, x)));
+				additionalContent.Clear();
 				
-				string hektometer = ExtractTextClean(RegionMappings.Hektometer(row), mat, engine);
+				string speedLimit;
 
-				string additionalText = ExtractTextClean(RegionMappings.AdditionalText(row), mat, engine);
-				
-				string arrivalTime = ExtractTextClean(RegionMappings.Arrival(row), mat, engine);
-				string departureTime = ExtractTextClean(RegionMappings.Departure(row), mat, engine);
-				
-				if (string.IsNullOrWhiteSpace(hektometer))
+				// TODO: We could remove this, if we know the answer to the TODO above
+				if (additionalSpeed != string.Empty)
 				{
-					// Add the current info to the next hektometer we see
-						
-					// Does the last information even matter, or can we safely skip this?
-					if(i == rowsRoi.Count)
-						continue;
-
-					string speedlimit = ExtractTextClean(RegionMappings.SpeedLimit(row), mat, engine);
-					
-					if (!string.IsNullOrWhiteSpace(speedlimit))
-					{
-						if (!mat.ContainsYellow(RegionMappings.YellowArea(row)))
-							additionalSpeed = speedlimit;
-					}
-
-					RowContent? content = ResolveContent(additionalText, arrivalTime, departureTime);
-					
-					// If it's a station, we are probably better off if we figure out its hektometer, and put it into the seperate list? Just like additionalSpeed?
-					if (content is Station station)
-					{
-						if (rows.Count != 0)
-						{
-							List<KeyValuePair<string, RowContent>> stations = rows.Where(x => x.Value is Station).ToList();
-
-							content = stations.Any(x => x.Value is Station value && 
-							                            value.Arrival == arrivalTime && value.Name == additionalText) ? null : station;
-						}
-						else
-							content = station;
-					}
-					
-					if(content != null)
-						additionalContent.Add(content);
+					speedLimit = additionalSpeed;
+					additionalSpeed = string.Empty;
 				}
 				else
 				{
-					RowContent? content;
-
-					string speedLimit;
-
-					// TODO: Rather make a "starting speed limit"?
-					if (additionalSpeed != string.Empty)
+					speedLimit = ExtractText(RegionMappings.SpeedLimit(row), mat, engine).Trim();
+				}
+					
+				if (!string.IsNullOrWhiteSpace(speedLimit))
+				{
+					// Skip if yellow (repeating)
+					if (!mat.ContainsYellow(RegionMappings.YellowArea(row)))
 					{
-						speedLimit = additionalSpeed;
-						additionalSpeed = string.Empty;
-					}
-					else
-					{
-						speedLimit = ExtractText(RegionMappings.SpeedLimit(row), mat, engine).Trim();
-					}
-						
-					if (!string.IsNullOrWhiteSpace(speedLimit))
-					{
-						// Skip if yellow (repeating)
-						if (!mat.ContainsYellow(RegionMappings.YellowArea(row)))
+						// Skip if already contained
+						if (speedChanges.Any())
 						{
-							// Skip if already contained
-							if (speedChanges.Any())
-							{
-								if(speedChanges.TakeLast(3).All(x => x.Key != hektometer))
-									speedChanges.Add(new KeyValuePair<string, string>(hektometer, speedLimit));
-							}
-							else
+							if(speedChanges.TakeLast(3).All(x => x.Key != hektometer))
 								speedChanges.Add(new KeyValuePair<string, string>(hektometer, speedLimit));
 						}
-					}
-
-					content = ResolveContent(additionalText, arrivalTime, departureTime);
-
-					if (content is Station station)
-					{
-						if (rows.Count != 0)
-						{
-							List<KeyValuePair<string, RowContent>> stations = rows.Where(x => x.Value is Station).ToList();
-
-							content = stations.Any(x => x.Value is Station value && 
-							                            value.Arrival == arrivalTime && value.Name == additionalText) ? null : station;
-						}
 						else
-							content = station;
+							speedChanges.Add(new KeyValuePair<string, string>(hektometer, speedLimit));
 					}
-
-					if (content == null)
-						continue;
-
-					rows.Add(new KeyValuePair<string, RowContent>(hektometer, content));
-					rows.AddRange(additionalContent.Select(x => new KeyValuePair<string, RowContent>(hektometer, x)));
-					
-					additionalContent.Clear();
 				}
+
+				RowContent? content = ResolveContent(additionalText, arrivalTime, departureTime);
+
+				content = CheckForDuplicateStation(content, arrivalTime, additionalText, rows);
+
+				if (content == null)
+					continue;
+
+				rows.Add(new KeyValuePair<string, RowContent>(hektometer, content));
+				
 			}
-		});
+		}
+	}
+
+	private static RowContent? CheckForDuplicateStation(RowContent content, string arrivalTime, string stationName, List<KeyValuePair<string, RowContent>> knownStations)
+	{
+		if (content is not Station station)
+			return null;
+
+		if (knownStations.Count == 0) 
+			return station;
+		
+		List<KeyValuePair<string, RowContent>> stations = knownStations.Where(x => x.Value is Station).ToList();
+
+		return stations.Any(x => x.Value is Station value && 
+		                         value.Arrival == arrivalTime && value.Name == stationName) ? null : station;
+
 	}
 
 	private static RowContent ResolveContent(string additionalText, string arrivalTime, string departureTime)
