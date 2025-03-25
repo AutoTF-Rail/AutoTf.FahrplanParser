@@ -21,7 +21,6 @@ internal static class Program
 		files.Sort();
 		foreach (string file in files)
 		{
-			Console.WriteLine($"Reading {file}");
 			Mat mat = CvInvoke.Imread(file);
 			
 			if (fileIndex == 0)
@@ -102,8 +101,6 @@ internal static class Program
 			Dictionary<string, RowContent> rows = new Dictionary<string, RowContent>();
 
 			rowsRoi.Reverse();
-
-			int previousSpeedLimit = 0;
 
 			List<RowContent> additionalContent = new List<RowContent>();
 			string additionalSpeed = string.Empty;
@@ -234,10 +231,13 @@ internal static class Program
 						rows.Add(hektoMeter, content);
 					
 					additionalContent.Clear();
-					continue;
 				}
 			}
 		}
+		
+		Console.WriteLine($"Finished at {DateTime.Now.ToString("mm:ss.fff")}");
+		
+		Console.WriteLine(Environment.NewLine + Environment.NewLine + Environment.NewLine);
 
 		foreach (KeyValuePair<string,string> speedChange in speedChanges)
 		{
