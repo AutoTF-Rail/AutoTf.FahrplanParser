@@ -3,6 +3,7 @@ using AutoTf.FahrplanParser;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.OCR;
+using Emgu.CV.Structure;
 
 internal static class Program
 {
@@ -160,17 +161,25 @@ internal static class Program
 					
 					if (!string.IsNullOrWhiteSpace(speedlimit))
 					{
-						if (speedChanges.Any())
+						Rectangle yellowRoi = new Rectangle(row.X + 74, row.Y, 35, 9);
+						
+						if (!ContainsYellow(yellowRoi, mat))
 						{
-							Console.WriteLine($"Last change: {speedChanges.Last().Value} at {speedChanges.Last().Key}.");
-							if(speedChanges.Last().Value != speedlimit)
+							// Skip if yellow
+							// Skip if already contained
+							if (speedChanges.Any())
+							{
+								Console.WriteLine(
+									$"Last change: {speedChanges.Last().Value} at {speedChanges.Last().Key}.");
+								if (speedChanges.Last().Value != speedlimit)
+									speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedlimit));
+							}
+							else
 								speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedlimit));
+
+							Console.WriteLine("Got speed limit: " + speedlimit + " at " + hektoMeter);
 						}
-						else 
-							speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedlimit));
-						
-						Console.WriteLine("Got speed limit: " + speedlimit + " at " + hektoMeter);
-						
+
 					}
 					
 					if (additionalText.Contains("Hbf"))
@@ -229,6 +238,26 @@ internal static class Program
 		}
 		
 		_engine.Dispose();
+	}
+	
+	public static bool ContainsYellow(Rectangle roi, Mat mat)
+	{
+		Mat roiMat = new Mat(mat, roi);
+
+		Mat hsv = new Mat();
+		CvInvoke.CvtColor(roiMat, hsv, ColorConversion.Bgr2Hsv);
+
+		ScalarArray lowerYellow = new ScalarArray(new MCvScalar(20, 100, 100));
+		ScalarArray upperYellow = new ScalarArray(new MCvScalar(30, 255, 255));
+
+		Mat mask = new Mat();
+		CvInvoke.InRange(hsv, lowerYellow, upperYellow, mask);
+
+		int nonZeroCount = CvInvoke.CountNonZero(mask);
+
+		int threshold = roi.Width * roi.Height / 25;
+
+		return nonZeroCount > threshold;
 	}
 
 	private static string GetHektometerFromRow(List<Rectangle> rows, int index, Mat mat)
