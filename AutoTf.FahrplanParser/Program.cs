@@ -19,7 +19,7 @@ internal static class Program
 			Rectangle planValidityRoi = new Rectangle(348, 11, 259, 44);
 			Rectangle dateRoi = new Rectangle(805, 11, 190, 44);
 			Rectangle timeRoi = new Rectangle(1066, 11, 160, 44);
-			Rectangle nextStopRoi = new Rectangle(1003, 69, 244, 29);
+			Rectangle nextStopRoi = new Rectangle(726, 67, 524, 33);
 			Rectangle currSpeedLimitRoi = new Rectangle(124, 750, 76, 36);
 		
 			Console.WriteLine($"Started at {DateTime.Now.ToString("mm:ss.fff")}");
@@ -29,13 +29,17 @@ internal static class Program
 		
 			Console.WriteLine($"Train Number: {ExtractText(trainNumRoi, mat)}");
 			Console.WriteLine($"Plan is{(ExtractText(planValidityRoi, mat).Contains("gültig") ? "" : " not")} valid.");
-			Console.WriteLine($"Next stop: {ExtractText(nextStopRoi, mat)}");
+			string nextStop = ExtractText(nextStopRoi, mat);
+			string newNextStop = nextStop.Split("alt: ")[1];
+			Console.WriteLine($"Next stop: {newNextStop}");
 			Console.WriteLine($"Current speed limit: {ExtractText(currSpeedLimitRoi, mat)}");
 		
 			Console.WriteLine($"Finished at {DateTime.Now.ToString("mm:ss.fff")}");
 		
 			mat.Dispose();
 		}
+		
+		_engine.Dispose();
 	}
 
 	private static string ExtractText(Rectangle roi, Mat mat)
