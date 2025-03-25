@@ -50,4 +50,34 @@ public static class RegionMappings
 	public static readonly Rectangle Delay = new Rectangle(696, 812, 134, 30);
 	public static readonly Rectangle Time = new Rectangle(1066, 11, 160, 44);
 	public static readonly Rectangle Date = new Rectangle(805, 11, 190, 44);
+
+	public static Rectangle Hektometer(Rectangle row)
+	{
+		return new Rectangle(row.X + 173, row.Y, 126, 44);
+	}
+	
+	public static Rectangle Arrival(Rectangle row)
+	{
+		return new Rectangle(row.X + 865, row.Y, 155, 44);
+	}
+	
+	public static Rectangle Departure(Rectangle row)
+	{
+		return new Rectangle(row.X + 1026, row.Y, 140, 44);
+	}
+	
+	public static Rectangle AdditionalText(Rectangle row)
+	{
+		return new Rectangle(row.X + 377, row.Y, 474, 44);
+	}
+	
+	public static Rectangle SpeedLimit(Rectangle row)
+	{
+		return new Rectangle(row.X + 50, row.Y, 59, 44);
+	}
+	
+	public static Rectangle YellowArea(Rectangle row)
+	{
+		return new Rectangle(row.X + 74, row.Y, 35, 9);
+	}
 }

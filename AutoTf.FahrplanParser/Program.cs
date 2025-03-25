@@ -1,9 +1,8 @@
 ﻿using System.Drawing;
 using AutoTf.FahrplanParser.Content;
+using AutoTf.FahrplanParser.Extensions;
 using Emgu.CV;
-using Emgu.CV.CvEnum;
 using Emgu.CV.OCR;
-using Emgu.CV.Structure;
 
 namespace AutoTf.FahrplanParser;
 
@@ -17,7 +16,7 @@ internal static class Program
 		// We can't just go by hektometer keys, because hektometers might repeat
 		List<KeyValuePair<string, string>> speedChanges = new List<KeyValuePair<string, string>>();
 
-		Dictionary<string, RowContent> rows = new Dictionary<string, RowContent>();
+		List<KeyValuePair<string, RowContent>> rows = new List<KeyValuePair<string, RowContent>>();
 
 		int fileIndex = 0;
 		List<string> files = Directory.GetFiles("FahrplanData/").ToList();
@@ -43,18 +42,16 @@ internal static class Program
 		}
 	}
 
-	private static async Task ProcessFileAsync(string file, int fileIndex, Dictionary<string, RowContent> rows, List<KeyValuePair<string, string>> speedChanges)
+	private static async Task ProcessFileAsync(string file, int fileIndex, List<KeyValuePair<string, RowContent>> rows, List<KeyValuePair<string, string>> speedChanges)
 	{
 		await Task.Run(() =>
 		{
-
 			using Tesseract engine = new Tesseract("tessdata/", "deu", OcrEngineMode.Default);
 				
 			Mat mat = CvInvoke.Imread(file);
 				
 			if (fileIndex == 0)
 			{
-					
 				Console.WriteLine($"Date: {ExtractText(RegionMappings.Date, mat, engine).Replace("\n", "")} - {ExtractText(RegionMappings.Time, mat, engine).Replace("\n", "")}");
 			
 				Console.WriteLine($"Train Number: {ExtractText(RegionMappings.TrainNumber, mat, engine)}");
@@ -69,7 +66,7 @@ internal static class Program
 					Rectangle checkRoi = new Rectangle(RegionMappings.LocationPoints[i].X + 25, RegionMappings.LocationPoints[i].Y + 10, 6, 25);
 					Mat checkMat = new Mat(mat, checkRoi);
 						
-					if(!IsMoreBlackThanWhite(checkMat))
+					if(!checkMat.IsMoreBlackThanWhite())
 						continue;
 
 					string location = ExtractText(RegionMappings.LocationPointsHektometer[i], mat, engine).TrimEnd();
@@ -82,27 +79,21 @@ internal static class Program
 			rowsRoi.Reverse();
 
 			List<RowContent> additionalContent = new List<RowContent>();
+			
 			string additionalSpeed = string.Empty;
 
 			for (int i = 0; i < rowsRoi.Count; i++)
 			{
 				Rectangle row = rowsRoi[i];
-				Rectangle hektoRoi = new Rectangle(row.X + 173, row.Y, 126, 44);
-				string hektoMeter = ExtractText(hektoRoi, mat, engine).Replace("\n", "");
-					
-				Rectangle arrivalRoi = new Rectangle(row.X + 865, row.Y, 155, 44);
-				Rectangle departureRoi = new Rectangle(row.X + 1026, row.Y, 140, 44);
+				
+				string hektometer = ExtractTextClean(RegionMappings.Hektometer(row), mat, engine);
 
-				string arrivalTime = ExtractText(arrivalRoi, mat, engine).Replace("\n", "").Trim();
-				string departureTime = ExtractText(departureRoi, mat, engine).Replace("\n", "").Trim();
-
-				Rectangle additionalTextRoi = new Rectangle(row.X + 377, row.Y, 474, 44);
-				string additionalText = ExtractText(additionalTextRoi, mat, engine).Trim();
-					
-				Rectangle speedLimitRoi = new Rectangle(row.X + 50, row.Y, 59, 44);
-				Rectangle yellowRoi = new Rectangle(row.X + 74, row.Y, 35, 9);
-					
-				if (string.IsNullOrWhiteSpace(hektoMeter))
+				string additionalText = ExtractTextClean(RegionMappings.AdditionalText(row), mat, engine);
+				
+				string arrivalTime = ExtractTextClean(RegionMappings.Arrival(row), mat, engine);
+				string departureTime = ExtractTextClean(RegionMappings.Departure(row), mat, engine);
+				
+				if (string.IsNullOrWhiteSpace(hektometer))
 				{
 					// Add the current info to the next hektometer we see
 						
@@ -110,44 +101,36 @@ internal static class Program
 					if(i == rowsRoi.Count)
 						continue;
 
-					string speedlimit = ExtractText(speedLimitRoi, mat, engine);
+					string speedlimit = ExtractTextClean(RegionMappings.SpeedLimit(row), mat, engine);
+					
 					if (!string.IsNullOrWhiteSpace(speedlimit))
 					{
-						if (!ContainsYellow(yellowRoi, mat))
+						if (!mat.ContainsYellow(RegionMappings.YellowArea(row)))
+							additionalSpeed = speedlimit;
+					}
+
+					RowContent? content = ResolveContent(additionalText, arrivalTime, departureTime);
+					
+					// If it's a station, we are probably better off if we figure out its hektometer, and put it into the seperate list? Just like additionalSpeed?
+					if (content is Station station)
+					{
+						if (rows.Count != 0)
 						{
-							additionalSpeed = speedlimit.Trim();
+							List<KeyValuePair<string, RowContent>> stations = rows.Where(x => x.Value is Station).ToList();
+
+							content = stations.Any(x => x.Value is Station value && 
+							                            value.Arrival == arrivalTime && value.Name == additionalText) ? null : station;
 						}
+						else
+							content = station;
 					}
-						
-					if (!string.IsNullOrWhiteSpace(arrivalTime) && !string.IsNullOrWhiteSpace(departureTime))
-					{
-						// TODO: This doesn't avoid duplicates, we need to check every additional content to ensure this station hasn't already been added.
-						// Or we keep a seperate list? Like the speed pretty much, we add it on the next known hektometer
-						additionalContent.Add(new Station()
-						{
-							Name = additionalText,
-							Arrival = arrivalTime,
-							Departure = departureTime
-						});
-					}
-					else if (additionalText.Contains("GSM-R"))
-					{
-						additionalContent.Add(new GSMRInfo(additionalText));
-					}
-					else if (additionalText.Contains("Asig"))
-					{
-						additionalContent.Add(new Asig());
-					}
-					else
-					{
-						// TODO: Continue cases
-						additionalContent.Add(new UnknownContent(additionalText));
-					}
-					continue;
+					
+					if(content != null)
+						additionalContent.Add(content);
 				}
 				else
 				{
-					RowContent? content = null;
+					RowContent? content;
 
 					string speedLimit;
 
@@ -159,111 +142,76 @@ internal static class Program
 					}
 					else
 					{
-						speedLimit = ExtractText(speedLimitRoi, mat, engine).Trim();
+						speedLimit = ExtractText(RegionMappings.SpeedLimit(row), mat, engine).Trim();
 					}
 						
 					if (!string.IsNullOrWhiteSpace(speedLimit))
 					{
-						if (!ContainsYellow(yellowRoi, mat))
+						// Skip if yellow (repeating)
+						if (!mat.ContainsYellow(RegionMappings.YellowArea(row)))
 						{
-							// Skip if yellow (repeating)
 							// Skip if already contained
 							if (speedChanges.Any())
 							{
-								if(speedChanges.TakeLast(3).All(x => x.Key != hektoMeter))
-									speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedLimit));
+								if(speedChanges.TakeLast(3).All(x => x.Key != hektometer))
+									speedChanges.Add(new KeyValuePair<string, string>(hektometer, speedLimit));
 							}
 							else
-								speedChanges.Add(new KeyValuePair<string, string>(hektoMeter, speedLimit));
+								speedChanges.Add(new KeyValuePair<string, string>(hektometer, speedLimit));
 						}
 					}
-						
-					if (!string.IsNullOrWhiteSpace(arrivalTime) && !string.IsNullOrWhiteSpace(departureTime))
+
+					content = ResolveContent(additionalText, arrivalTime, departureTime);
+
+					if (content is Station station)
 					{
-						Station station = new Station()
-						{
-							Name = additionalText,
-							Arrival = arrivalTime,
-							Departure = departureTime,
-							AdditionalContent = additionalContent
-						};
-							
-						if (rows.Any())
+						if (rows.Count != 0)
 						{
 							List<KeyValuePair<string, RowContent>> stations = rows.Where(x => x.Value is Station).ToList();
-							if(!stations.Any(x => ((Station)x.Value).Arrival == arrivalTime && ((Station)x.Value).Name == additionalText))
-								content = station;
+
+							content = stations.Any(x => x.Value is Station value && 
+							                            value.Arrival == arrivalTime && value.Name == additionalText) ? null : station;
 						}
 						else
 							content = station;
-							
 					}
-					else if (additionalText.Contains("GSM-R"))
-					{
-						content = new GSMRInfo(additionalText.Trim())
-						{
-							AdditionalContent = additionalContent
-						};
-					}
-					else if (additionalText.Contains("Asig"))
-					{
-						content = new Asig()
-						{
-							AdditionalContent = additionalContent
-						};
-					}
-					else
-					{
-						// TODO: Continue cases
-						content = new UnknownContent(additionalText)
-						{
-							AdditionalContent = additionalContent
-						};
-					}
-						
-					if (rows.ContainsKey(hektoMeter))
-						rows[hektoMeter].AdditionalContent.Add(content);
-					else
-						rows.Add(hektoMeter, content);
-						
+
+					if (content == null)
+						continue;
+
+					rows.Add(new KeyValuePair<string, RowContent>(hektometer, content));
+					rows.AddRange(additionalContent.Select(x => new KeyValuePair<string, RowContent>(hektometer, x)));
+					
 					additionalContent.Clear();
 				}
 			}
 		});
 	}
 
-	private static bool ContainsYellow(Rectangle roi, Mat mat)
+	private static RowContent ResolveContent(string additionalText, string arrivalTime, string departureTime)
 	{
-		Mat roiMat = new Mat(mat, roi);
+		if (!string.IsNullOrWhiteSpace(arrivalTime) && !string.IsNullOrWhiteSpace(departureTime))
+		{
+			return new Station()
+			{
+				Name = additionalText,
+				Arrival = arrivalTime,
+				Departure = departureTime
+			};
+		}
 
-		Mat hsv = new Mat();
-		CvInvoke.CvtColor(roiMat, hsv, ColorConversion.Bgr2Hsv);
+		if (additionalText.Contains("GSM-R"))
+		{
+			return new GSMRInfo(additionalText.Trim());
+		}
 
-		ScalarArray lowerYellow = new ScalarArray(new MCvScalar(25, 100, 100));
-		ScalarArray upperYellow = new ScalarArray(new MCvScalar(35, 255, 255));
+		if (additionalText.Contains("Asig"))
+		{
+			return new Asig();
+		}
 
-		Mat mask = new Mat();
-		CvInvoke.InRange(hsv, lowerYellow, upperYellow, mask);
-
-		int nonZeroCount = CvInvoke.CountNonZero(mask);
-
-		int threshold = roi.Width * roi.Height / 20;
-
-		return nonZeroCount > threshold;
-	}
-	
-	private static bool IsMoreBlackThanWhite(Mat img)
-	{
-		Mat binaryImg = new Mat();
-		CvInvoke.CvtColor(img, binaryImg, ColorConversion.Bgr2Gray);
-		CvInvoke.Threshold(binaryImg, binaryImg, 128, 255, ThresholdType.Binary);
-
-		int whitePixels = CvInvoke.CountNonZero(binaryImg);
-		int totalPixels = img.Rows * img.Cols;
-		int blackPixels = totalPixels - whitePixels;
-		
-		binaryImg.Dispose();
-		return blackPixels > whitePixels;
+		// TODO: Continue cases
+		return new UnknownContent(additionalText);
 	}
 
 	private static string ExtractText(Rectangle roi, Mat mat, Tesseract engine)
@@ -273,6 +221,8 @@ internal static class Program
 		
 		engine.SetImage(pix);
 		
-		return engine.GetUTF8Text();
+		return engine.GetUTF8Text().Trim();
 	}
+
+	private static string ExtractTextClean(Rectangle roi, Mat mat, Tesseract engine) => ExtractText(roi, mat, engine).Replace("\n", "");
 }
