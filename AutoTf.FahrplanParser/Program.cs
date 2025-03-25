@@ -146,42 +146,50 @@ internal static class Program
 				}
 				else
 				{
-					Rectangle additionalTextRoi = new Rectangle(row.X + 377, row.Y, 1165, 44);
+					Rectangle additionalTextRoi = new Rectangle(row.X + 377, row.Y, 474, 44);
 					string additionalText = ExtractText(additionalTextRoi, mat);
 
+					RowContent? content = null;
+					
 					if (additionalText.Contains("Hbf"))
 					{
-						rows.Add(hektoMeter, new Station()
+						content = new Station()
 						{
 							Name = additionalText.Trim(),
 							Arrival = "Test",
 							Departure = "Test",
 							AdditionalContent = additionalContent
-						});
+						};
+						
 						Console.WriteLine($"Added station {additionalText.Trim()} at {hektoMeter}.");
 					}
 					else if (additionalText.Contains("GSM-R"))
 					{
-						rows.Add(hektoMeter, new GSMRInfo(additionalText.Trim())
+						content = new GSMRInfo(additionalText.Trim())
 						{
 							AdditionalContent = additionalContent
-						});
+						};
 					}
 					else if (additionalText.Contains("Asig"))
 					{
-						rows.Add(hektoMeter, new Asig()
+						content = new Asig()
 						{
 							AdditionalContent = additionalContent
-						});
+						};
 					}
 					else
 					{
 						// TODO: Continue cases
-						rows.Add(hektoMeter, new UnknownContent(additionalText)
+						content = new UnknownContent(additionalText)
 						{
 							AdditionalContent = additionalContent
-						});
+						};
 					}
+					
+					if (rows.ContainsKey(hektoMeter))
+						rows[hektoMeter].AdditionalContent.Add(content);
+					else
+						rows.Add(hektoMeter, content);
 					
 					additionalContent.Clear();
 					continue;
