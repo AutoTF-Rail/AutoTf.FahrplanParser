@@ -64,21 +64,34 @@ public class Parser : ParserBase
 	{
 		Mat lzbStartIcon = CvInvoke.Imread("Icons/LzbStartIcon.png", ImreadModes.Grayscale);
 		
+		return SearchForIcon(mat, lzbStartIcon, row);
+	}
+
+	public bool IsLzbEnd(Mat mat, Rectangle row)
+	{
+		Mat lzbStartIcon = CvInvoke.Imread("Icons/LzbEndeIcon.png", ImreadModes.Grayscale);
+		
+		return SearchForIcon(mat, lzbStartIcon, row);
+	}
+	
+	private bool SearchForIcon(Mat mat, Mat icon, Rectangle row)
+	{
 		Rectangle roi = new Rectangle(row.X + 386, row.Y, 60, 44);
+		
 		Mat area = new Mat(mat, roi);
 		CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
 		
 		if (area.NumberOfChannels != 1)
 			CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
 		
-		if (lzbStartIcon.NumberOfChannels != 1)
-			CvInvoke.CvtColor(lzbStartIcon, lzbStartIcon, ColorConversion.Bgr2Gray);
+		if (icon.NumberOfChannels != 1)
+			CvInvoke.CvtColor(icon, icon, ColorConversion.Bgr2Gray);
 		
-		int resultCols = area.Cols - lzbStartIcon.Cols + 1;
-		int resultRows = area.Rows - lzbStartIcon.Rows + 1;
+		int resultCols = area.Cols - icon.Cols + 1;
+		int resultRows = area.Rows - icon.Rows + 1;
 		Mat result = new Mat(resultRows, resultCols, DepthType.Cv32F, 1);
 		
-		CvInvoke.MatchTemplate(area, lzbStartIcon, result, TemplateMatchingType.CcoeffNormed);
+		CvInvoke.MatchTemplate(area, icon, result, TemplateMatchingType.CcoeffNormed);
 		
 		double minVal = 0;
 		double maxVal = 0;
@@ -88,7 +101,6 @@ public class Parser : ParserBase
 		CvInvoke.MinMaxLoc(result, ref minVal, ref maxVal, ref minLoc, ref maxLoc);
 
 		double threshold = 0.8;
-		Console.WriteLine("Maxval: " + maxVal);
 
 		return maxVal >= threshold;
 	}

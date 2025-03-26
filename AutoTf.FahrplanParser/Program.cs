@@ -137,15 +137,27 @@ internal static class Program
 					}
 				}
 
+				RowContent? content = null;
+				
 				if (string.IsNullOrWhiteSpace(additionalText))
 				{
-					if(parser.IsLzbStart(mat, row))
-						Console.WriteLine($"Found lzb start at {hektometer}.");
+					if (parser.IsLzbStart(mat, row))
+					{
+						content = new LzbStart();
+						Console.WriteLine($"Found LZB Start at {hektometer}.");
+					}
+					else if (parser.IsLzbEnd(mat, row))
+					{
+						content = new LzbEnd();
+						Console.WriteLine($"Found LZB End at {hektometer}.");
+					}
 				}
+				else
+				{
+					content = parser.ResolveContent(additionalText, arrivalTime, departureTime);
 
-				RowContent? content = parser.ResolveContent(additionalText, arrivalTime, departureTime);
-
-				content = parser.CheckForDuplicateStation(content, arrivalTime, additionalText, rows);
+					content = parser.CheckForDuplicateStation(content, arrivalTime, additionalText, rows);
+				}
 
 				if (content == null)
 					continue;
