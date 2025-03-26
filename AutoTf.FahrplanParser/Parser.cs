@@ -80,6 +80,7 @@ public class Parser : ParserBase
 		CvInvoke.MinMaxLoc(result, ref minVal, ref maxVal, ref minLoc, ref maxLoc);
 
 		double threshold = 0.8;
+		Console.WriteLine("Maxval: " + maxVal);
 
 		return maxVal >= threshold;
 	}
