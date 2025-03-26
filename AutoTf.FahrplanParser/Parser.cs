@@ -69,8 +69,8 @@ public class Parser : ParserBase
 		area.ConvertTo(area, DepthType.Cv8U);
 		lzbStartIcon.ConvertTo(lzbStartIcon, DepthType.Cv8U);
 		
-		int resultCols = mat.Cols - mat.Cols + 1;
-		int resultRows = mat.Rows - mat.Rows + 1;
+		int resultCols = area.Cols - lzbStartIcon.Cols + 1;
+		int resultRows = area.Rows - lzbStartIcon.Rows + 1;
 		Mat result = new Mat(resultRows, resultCols, DepthType.Cv32F, 1);
 		
 		CvInvoke.MatchTemplate(area, lzbStartIcon, result, TemplateMatchingType.CcoeffNormed);
