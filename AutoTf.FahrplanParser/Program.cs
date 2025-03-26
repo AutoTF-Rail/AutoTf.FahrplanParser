@@ -151,6 +151,11 @@ internal static class Program
 						content = new LzbEnd();
 						Console.WriteLine($"Found LZB End at {hektometer}.");
 					}
+					else if (parser.IsYenMarker(mat, row))
+					{
+						content = new YenMarker();
+						Console.WriteLine($"Found Yen marker at {hektometer}.");
+					}
 				}
 				else
 				{
