@@ -137,6 +137,12 @@ internal static class Program
 					}
 				}
 
+				if (string.IsNullOrWhiteSpace(additionalText))
+				{
+					if(parser.IsLzbStart(mat, row))
+						Console.WriteLine("Found lzb start.");
+				}
+
 				RowContent? content = parser.ResolveContent(additionalText, arrivalTime, departureTime);
 
 				content = parser.CheckForDuplicateStation(content, arrivalTime, additionalText, rows);

@@ -2,6 +2,7 @@ using System.Drawing;
 using AutoTf.FahrplanParser.Content;
 using AutoTf.FahrplanParser.Extensions;
 using Emgu.CV;
+using Emgu.CV.CvEnum;
 using Emgu.CV.OCR;
 
 namespace AutoTf.FahrplanParser;
@@ -57,5 +58,29 @@ public class Parser : ParserBase
 		}
 
 		return null;
+	}
+
+	public bool IsLzbStart(Mat mat, Rectangle row)
+	{
+		Mat lzbStartIcon = CvInvoke.Imread("Icons/LzbStartIcon.png", ImreadModes.Grayscale);
+		Rectangle roi = new Rectangle(row.X + 386, row.Y, 60, 44);
+		Mat area = new Mat(mat, roi);
+		
+		int resultCols = mat.Cols - mat.Cols + 1;
+		int resultRows = mat.Rows - mat.Rows + 1;
+		Mat result = new Mat(resultRows, resultCols, DepthType.Cv32F, 1);
+		
+		CvInvoke.MatchTemplate(area, lzbStartIcon, result, TemplateMatchingType.CcoeffNormed);
+		
+		double minVal = 0;
+		double maxVal = 0;
+		Point minLoc = Point.Empty;
+		Point maxLoc = Point.Empty;
+		
+		CvInvoke.MinMaxLoc(result, ref minVal, ref maxVal, ref minLoc, ref maxLoc);
+
+		double threshold = 0.8;
+
+		return maxVal >= threshold;
 	}
 }
