@@ -140,7 +140,7 @@ internal static class Program
 				if (string.IsNullOrWhiteSpace(additionalText))
 				{
 					if(parser.IsLzbStart(mat, row))
-						Console.WriteLine("Found lzb start.");
+						Console.WriteLine($"Found lzb start at {hektometer}.");
 				}
 
 				RowContent? content = parser.ResolveContent(additionalText, arrivalTime, departureTime);
