@@ -63,8 +63,10 @@ public class Parser : ParserBase
 	public bool IsLzbStart(Mat mat, Rectangle row)
 	{
 		Mat lzbStartIcon = CvInvoke.Imread("Icons/LzbStartIcon.png", ImreadModes.Grayscale);
+		CvInvoke.CvtColor(lzbStartIcon, lzbStartIcon, ColorConversion.Bgr2Gray);
 		Rectangle roi = new Rectangle(row.X + 386, row.Y, 60, 44);
 		Mat area = new Mat(mat, roi);
+		CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
 		
 		area.ConvertTo(area, DepthType.Cv8U);
 		lzbStartIcon.ConvertTo(lzbStartIcon, DepthType.Cv8U);
