@@ -66,6 +66,9 @@ public class Parser : ParserBase
 		Rectangle roi = new Rectangle(row.X + 386, row.Y, 60, 44);
 		Mat area = new Mat(mat, roi);
 		
+		area.ConvertTo(area, DepthType.Cv8U);
+		lzbStartIcon.ConvertTo(lzbStartIcon, DepthType.Cv8U);
+		
 		int resultCols = mat.Cols - mat.Cols + 1;
 		int resultRows = mat.Rows - mat.Rows + 1;
 		Mat result = new Mat(resultRows, resultCols, DepthType.Cv32F, 1);
