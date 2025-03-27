@@ -5,12 +5,10 @@ namespace AutoTf.FahrplanParser.Content.Signals;
 /// </summary>
 public class BlockVorsignal : RowContent
 {
-	public BlockVorsignal(string stationName, string speed)
+	public BlockVorsignal(string signalNummer)
 	{
-		StationName = stationName;
-		Speed = speed;
+		SignalNummer = signalNummer;
 	}
 
-	public string StationName { get; set; }
-	public string Speed { get; set; }
+	public string SignalNummer { get; set; }
 }

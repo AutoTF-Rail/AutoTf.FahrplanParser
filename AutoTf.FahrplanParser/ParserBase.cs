@@ -85,7 +85,7 @@ public abstract class ParserBase
 			"Asig" => new AusfahrSignal(remainingText, speed),
 			"Bksig" => new BlockSignal(remainingText, speed),
 			"Zsig" => new ZwischenSignal(remainingText, speed),
-			"Bkvsig" => new BlockVorsignal(remainingText, speed),
+			"Bkvsig" => new BlockVorsignal(remainingText),
 			"Sbk" => new SelbstBlockSignal(remainingText),
 			_ => null
 		};

@@ -56,22 +56,24 @@ internal static class Program
 			{
 				content = $"Bksig{((blockSignal.Speed == "40") ? "" : $"Bk{blockSignal.Speed}")} {blockSignal.StationName}";
 			}
-			else if (row.Value is BlockVorsignal blockVorsignal)
-			{
-				content = $"Bkvsig {blockVorsignal.Speed} {blockVorsignal.StationName}";
-			}
 			else if (row.Value is EinfahrSignal einfahrSignal)
 			{
 				content = $"Esig{((einfahrSignal.Speed == "40") ? "" : $"E{einfahrSignal.Speed}")} {einfahrSignal.StationName}";
-			}
-			else if (row.Value is SelbstBlockSignal selbstBlockSignal)
-			{
-				content = $"Sbk {selbstBlockSignal.SignalNummer}";
 			}
 			else if (row.Value is ZwischenSignal zwischenSignal)
 			{
 				content = $"Zsig{((zwischenSignal.Speed == "40") ? "" : $"Z{zwischenSignal.Speed}")} {zwischenSignal.StationName}";
 			}
+			
+			else if (row.Value is SelbstBlockSignal selbstBlockSignal)
+			{
+				content = $"Sbk {selbstBlockSignal.SignalNummer}";
+			}
+			else if (row.Value is BlockVorsignal blockVorsignal)
+			{
+				content = $"Bkvsig {blockVorsignal.SignalNummer}";
+			}
+			
 			else if (row.Value is Abzweigung abzweigung)
 			{
 				content = $"Abzweigung {abzweigung.Name}";
