@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using AutoTf.FahrplanParser.Content;
+using AutoTf.FahrplanParser.Content.Signals;
 using AutoTf.FahrplanParser.Extensions;
 using Emgu.CV;
 using Emgu.CV.OCR;
@@ -40,6 +41,65 @@ internal static class Program
 		{
 			Station stationVar = (Station)station.Value;
 			Console.WriteLine($"[{station.Key}] Arrive at {stationVar.Arrival} and depart at {stationVar.Departure} from {stationVar.Name}.");
+		}
+		
+		foreach (KeyValuePair<string,RowContent> row in rows)
+		{
+			string content = string.Empty;
+			if (row.Value is AusfahrSignal ausfahrSignal)
+			{
+				content = $"Ausfahrsignal: Speed: {ausfahrSignal.Speed} Station: {ausfahrSignal.StationName}";
+			}
+			else if (row.Value is BlockSignal blockSignal)
+			{
+				content = $"BlockSignal: Speed: {blockSignal.Speed} Station: {blockSignal.StationName}";
+			}
+			else if (row.Value is BlockVorsignal blockVorsignal)
+			{
+				content = $"BlockVorsignal: Speed: {blockVorsignal.Speed} Station: {blockVorsignal.StationName}";
+			}
+			else if (row.Value is EinfahrSignal einfahrSignal)
+			{
+				content = $"Einfahr: Speed: {einfahrSignal.Speed} Station: {einfahrSignal.StationName}";
+			}
+			else if (row.Value is SelbstBlockSignal selbstBlockSignal)
+			{
+				content = $"SelbstBlockSignal: Speed: {selbstBlockSignal.Speed} Station: {selbstBlockSignal.StationName}";
+			}
+			else if (row.Value is ZwischenSignal zwischenSignal)
+			{
+				content = $"ZwischenSignal: Speed: {zwischenSignal.Speed} Station: {zwischenSignal.StationName}";
+			}
+			else if (row.Value is Abzweigung abzweigung)
+			{
+				content = $"Abzweigung: {abzweigung.AdditionalContent}";
+			}
+			else if (row.Value is GSMRInfo gmsrInfo)
+			{
+				content = $"GSMR Info: {gmsrInfo.AdditionalContent}";
+			}
+			else if (row.Value is LzbStart lzbStart)
+			{
+				content = $"LZB Start {lzbStart.AdditionalContent}";
+			}
+			else if (row.Value is LzbEnd lzbEnd)
+			{
+				content = $"LZB End {lzbEnd.AdditionalContent}";
+			}
+			else if (row.Value is Station station)
+			{
+				content = $"Station: {station.Name} Arrival: {station.Arrival} Departure: {station.Departure}";
+			}
+			else if (row.Value is YenMarker yenMarker)
+			{
+				content = $"Station {yenMarker.AdditionalContent}";
+			}
+			else if (row.Value is UnknownContent unknownContent)
+			{
+				content = $"UnknownContent: {unknownContent.Content}";
+			}
+			
+			Console.WriteLine($"[{row.Key}] {content}");
 		}
 
 		return Task.CompletedTask;
@@ -144,17 +204,14 @@ internal static class Program
 					if (parser.IsLzbStart(mat, row))
 					{
 						content = new LzbStart();
-						Console.WriteLine($"Found LZB Start at {hektometer}.");
 					}
 					else if (parser.IsLzbEnd(mat, row))
 					{
 						content = new LzbEnd();
-						Console.WriteLine($"Found LZB End at {hektometer}.");
 					}
 					else if (parser.IsYenMarker(mat, row))
 					{
 						content = new YenMarker();
-						Console.WriteLine($"Found Yen marker at {hektometer}.");
 					}
 				}
 				else
