@@ -50,27 +50,27 @@ internal static class Program
 			string content = string.Empty;
 			if (row.Value is AusfahrSignal ausfahrSignal)
 			{
-				content = $"Ausfahrsignal: Speed: {ausfahrSignal.Speed} Station: {ausfahrSignal.StationName}";
+				content = $"Asig{((ausfahrSignal.Speed == "40") ? "" : $"A{ausfahrSignal.Speed}")} {ausfahrSignal.StationName}";
 			}
 			else if (row.Value is BlockSignal blockSignal)
 			{
-				content = $"BlockSignal: Speed: {blockSignal.Speed} Station: {blockSignal.StationName}";
+				content = $"Bksig{((blockSignal.Speed == "40") ? "" : $"Bk{blockSignal.Speed}")} {blockSignal.StationName}";
 			}
 			else if (row.Value is BlockVorsignal blockVorsignal)
 			{
-				content = $"BlockVorsignal: Speed: {blockVorsignal.Speed} Station: {blockVorsignal.StationName}";
+				content = $"Bkvsig {blockVorsignal.Speed} {blockVorsignal.StationName}";
 			}
 			else if (row.Value is EinfahrSignal einfahrSignal)
 			{
-				content = $"EinfahrSignal: Speed: {einfahrSignal.Speed} Station: {einfahrSignal.StationName}";
+				content = $"Esig{((einfahrSignal.Speed == "40") ? "" : $"E{einfahrSignal.Speed}")} {einfahrSignal.StationName}";
 			}
 			else if (row.Value is SelbstBlockSignal selbstBlockSignal)
 			{
-				content = $"SelbstBlockSignal {selbstBlockSignal.SignalNummer}";
+				content = $"Sbk {selbstBlockSignal.SignalNummer}";
 			}
 			else if (row.Value is ZwischenSignal zwischenSignal)
 			{
-				content = $"ZwischenSignal: Speed: {zwischenSignal.Speed} Station: {zwischenSignal.StationName}";
+				content = $"Zsig{((zwischenSignal.Speed == "40") ? "" : $"Z{zwischenSignal.Speed}")} {zwischenSignal.StationName}";
 			}
 			else if (row.Value is Abzweigung abzweigung)
 			{
