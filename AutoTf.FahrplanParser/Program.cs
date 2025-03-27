@@ -63,9 +63,6 @@ internal static class Program
 		Parser parser = new Parser(engine);
 		
 		Mat mat = CvInvoke.Imread(file);
-		CvInvoke.CvtColor(mat, mat, ColorConversion.Bgr2Gray);
-		
-		Mat rawMat = CvInvoke.Imread(file);
 		
 		if (fileIndex == 0)
 		{
@@ -105,7 +102,7 @@ internal static class Program
 				
 				if (!string.IsNullOrWhiteSpace(speedlimit))
 				{
-					if (!rawMat.ContainsYellow(RegionMappings.YellowArea(row)))
+					if (!mat.ContainsYellow(RegionMappings.YellowArea(row)))
 						additionalSpeed = speedlimit;
 				}
 
@@ -139,7 +136,7 @@ internal static class Program
 				if (!string.IsNullOrWhiteSpace(speedLimit))
 				{
 					// Skip if yellow (repeating)
-					if (!rawMat.ContainsYellow(RegionMappings.YellowArea(row)))
+					if (!mat.ContainsYellow(RegionMappings.YellowArea(row)))
 					{
 						// Skip if already contained
 						if (speedChanges.Any())
@@ -156,15 +153,15 @@ internal static class Program
 				
 				if (string.IsNullOrWhiteSpace(additionalText))
 				{
-					if (parser.IsLzbStart(rawMat, row))
+					if (parser.IsLzbStart(mat, row))
 					{
 						content = new LzbStart();
 					}
-					else if (parser.IsLzbEnd(rawMat, row))
+					else if (parser.IsLzbEnd(mat, row))
 					{
 						content = new LzbEnd();
 					}
-					else if (parser.IsYenMarker(rawMat, row))
+					else if (parser.IsYenMarker(mat, row))
 					{
 						content = new YenMarker();
 					}
