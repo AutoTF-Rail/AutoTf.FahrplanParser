@@ -63,6 +63,7 @@ internal static class Program
 		Parser parser = new Parser(engine);
 		
 		Mat mat = CvInvoke.Imread(file);
+		Mat rawMat = CvInvoke.Imread(file);
 		CvInvoke.CvtColor(mat, mat, ColorConversion.Bgr2Gray);
 		
 		if (fileIndex == 0)
@@ -86,110 +87,105 @@ internal static class Program
 		
 		string additionalSpeed = string.Empty;
 
-		try
+		for (int i = 0; i < rowsRoi.Count; i++)
 		{
-			for (int i = 0; i < rowsRoi.Count; i++)
+			Rectangle row = rowsRoi[i];
+
+			string hektometer = parser.Hektometer(mat, row);
+			string additionalText = parser.AdditionalText(mat, row);
+			string arrivalTime = parser.Arrival(mat, row);
+			string departureTime = parser.Departure(mat, row);
+			
+			// If we don't have a hektometer, we will add it's info to the next one
+			if (string.IsNullOrWhiteSpace(hektometer))
 			{
-				Rectangle row = rowsRoi[i];
-
-				string hektometer = parser.Hektometer(mat, row);
-				string additionalText = parser.AdditionalText(mat, row);
-				string arrivalTime = parser.Arrival(mat, row);
-				string departureTime = parser.Departure(mat, row);
+				// TODO: Does this case ever happen? Having a speed limit change at a unknown hektometer? If not, this can be removed
+				string speedlimit = parser.SpeedLimit(mat, row);
 				
-				// If we don't have a hektometer, we will add it's info to the next one
-				if (string.IsNullOrWhiteSpace(hektometer))
+				if (!string.IsNullOrWhiteSpace(speedlimit))
 				{
-					// TODO: Does this case ever happen? Having a speed limit change at a unknown hektometer? If not, this can be removed
-					string speedlimit = parser.SpeedLimit(mat, row);
-					
-					if (!string.IsNullOrWhiteSpace(speedlimit))
-					{
-						if (!mat.ContainsYellow(RegionMappings.YellowArea(row)))
-							additionalSpeed = speedlimit;
-					}
+					if (!rawMat.ContainsYellow(RegionMappings.YellowArea(row)))
+						additionalSpeed = speedlimit;
+				}
 
-					RowContent? content = parser.ResolveContent(additionalText, arrivalTime, departureTime);
+				RowContent? content = parser.ResolveContent(additionalText, arrivalTime, departureTime);
+				
+				content = parser.CheckForDuplicateContent(content, hektometer, rows);
+				
+				if(content == null)
+					continue;
 					
-					content = parser.CheckForDuplicateContent(content, hektometer, rows);
-					
-					if(content == null)
-						continue;
-						
-					additionalContent.Add(content);
+				additionalContent.Add(content);
+			}
+			else
+			{
+				rows.AddRange(additionalContent.Select(x => new KeyValuePair<string, RowContent>(hektometer, x)));
+				additionalContent.Clear();
+				
+				string speedLimit;
+
+				// TODO: We could remove this, if we know the answer to the TODO above
+				if (additionalSpeed != string.Empty)
+				{
+					speedLimit = additionalSpeed;
+					additionalSpeed = string.Empty;
 				}
 				else
 				{
-					rows.AddRange(additionalContent.Select(x => new KeyValuePair<string, RowContent>(hektometer, x)));
-					additionalContent.Clear();
+					speedLimit = parser.SpeedLimit(mat, row);
+				}
 					
-					string speedLimit;
-
-					// TODO: We could remove this, if we know the answer to the TODO above
-					if (additionalSpeed != string.Empty)
+				if (!string.IsNullOrWhiteSpace(speedLimit))
+				{
+					// Skip if yellow (repeating)
+					if (!mat.ContainsYellow(RegionMappings.YellowArea(row)))
 					{
-						speedLimit = additionalSpeed;
-						additionalSpeed = string.Empty;
-					}
-					else
-					{
-						speedLimit = parser.SpeedLimit(mat, row);
-					}
-						
-					if (!string.IsNullOrWhiteSpace(speedLimit))
-					{
-						// Skip if yellow (repeating)
-						if (!mat.ContainsYellow(RegionMappings.YellowArea(row)))
+						// Skip if already contained
+						if (speedChanges.Any())
 						{
-							// Skip if already contained
-							if (speedChanges.Any())
-							{
-								if(speedChanges.TakeLast(3).All(x => x.Key != hektometer))
-									speedChanges.Add(new KeyValuePair<string, string>(hektometer, speedLimit));
-							}
-							else
+							if(speedChanges.TakeLast(3).All(x => x.Key != hektometer))
 								speedChanges.Add(new KeyValuePair<string, string>(hektometer, speedLimit));
 						}
+						else
+							speedChanges.Add(new KeyValuePair<string, string>(hektometer, speedLimit));
 					}
-
-					RowContent? content = null;
-					
-					if (string.IsNullOrWhiteSpace(additionalText))
-					{
-						if (parser.IsLzbStart(mat, row))
-						{
-							content = new LzbStart();
-						}
-						else if (parser.IsLzbEnd(mat, row))
-						{
-							content = new LzbEnd();
-						}
-						else if (parser.IsYenMarker(mat, row))
-						{
-							content = new YenMarker();
-						}
-					}
-					else
-					{
-						content = parser.ResolveContent(additionalText, arrivalTime, departureTime);
-						
-						// No need for a null check, since the method does it
-						// if(!string.IsNullOrWhiteSpace(arrivalTime))
-						// 	content = parser.CheckForDuplicateStation(content, arrivalTime, additionalText, rows);
-					}
-					if(content != null)
-						content = parser.CheckForDuplicateContent(content, hektometer, rows);
-
-					if (content == null)
-						continue;
-
-					rows.Add(new KeyValuePair<string, RowContent>(hektometer, content));
 				}
+
+				RowContent? content = null;
+				
+				if (string.IsNullOrWhiteSpace(additionalText))
+				{
+					if (parser.IsLzbStart(mat, row))
+					{
+						content = new LzbStart();
+					}
+					else if (parser.IsLzbEnd(mat, row))
+					{
+						content = new LzbEnd();
+					}
+					else if (parser.IsYenMarker(mat, row))
+					{
+						content = new YenMarker();
+					}
+				}
+				else
+				{
+					content = parser.ResolveContent(additionalText, arrivalTime, departureTime);
+					
+					// No need for a null check, since the method does it
+					// if(!string.IsNullOrWhiteSpace(arrivalTime))
+					// 	content = parser.CheckForDuplicateStation(content, arrivalTime, additionalText, rows);
+				}
+				if(content != null)
+					content = parser.CheckForDuplicateContent(content, hektometer, rows);
+
+				if (content == null)
+					continue;
+
+				rows.Add(new KeyValuePair<string, RowContent>(hektometer, content));
 			}
 		}
-		catch (Exception e)
-		{
-			Console.WriteLine(e);
-		}
+		mat.Dispose();
+		rawMat.Dispose();
 	}
 }
