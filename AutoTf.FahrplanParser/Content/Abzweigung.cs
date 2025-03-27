@@ -11,4 +11,9 @@ public class Abzweigung : RowContent
 	}
 	
 	public string Name { get; set; }
+	
+	public override string GetPrint()
+	{
+		return $"Abzw {Name}";
+	}
 }

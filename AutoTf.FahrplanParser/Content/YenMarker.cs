@@ -6,5 +6,8 @@ namespace AutoTf.FahrplanParser.Content;
 /// </summary>
 public class YenMarker : RowContent
 {
-	
+	public override string GetPrint()
+	{
+		return "\u00a5";
+	}
 }

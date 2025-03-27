@@ -13,4 +13,14 @@ public class ZwischenSignal : RowContent
 
 	public string StationName { get; set; }
 	public string Speed { get; set; }
+	
+	public override string GetPrint()
+	{
+		string speed = string.Empty;
+		
+		if (Speed != "40")
+			speed = $" Z{Speed}";
+
+		return $"Zsig{speed} {StationName}";
+	}
 }

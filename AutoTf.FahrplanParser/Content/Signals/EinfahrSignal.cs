@@ -17,4 +17,14 @@ public class EinfahrSignal : RowContent
 
 	// TODO: Nur bei Hp2(langsamfahrt): Ausfahrt mit 40, solange nicht größer definiert im Fahrplan 
 	public string Speed { get; set; }
+	
+	public override string GetPrint()
+	{
+		string speed = string.Empty;
+		
+		if (Speed != "40")
+			speed = $" E{Speed}";
+
+		return $"Esig{speed} {StationName}";
+	}
 }

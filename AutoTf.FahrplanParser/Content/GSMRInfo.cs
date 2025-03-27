@@ -8,4 +8,9 @@ public class GSMRInfo : RowContent
 	}
 	
 	public string Info { get; set; }
+	
+	public override string GetPrint()
+	{
+		return $"GSM-R Info: {Info}";
+	}
 }

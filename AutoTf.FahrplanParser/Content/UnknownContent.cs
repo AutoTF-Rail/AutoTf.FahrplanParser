@@ -8,4 +8,9 @@ public class UnknownContent : RowContent
 	}
 
 	public string Content { get; set; }
+	
+	public override string GetPrint()
+	{
+		return $"Unknown: {Content}";
+	}
 }

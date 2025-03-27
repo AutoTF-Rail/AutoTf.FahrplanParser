@@ -47,68 +47,7 @@ internal static class Program
 		
 		foreach (KeyValuePair<string,RowContent> row in rows)
 		{
-			string content = string.Empty;
-			if (row.Value is AusfahrSignal ausfahrSignal)
-			{
-				content = $"Asig{((ausfahrSignal.Speed == "40") ? "" : $"A{ausfahrSignal.Speed}")} {ausfahrSignal.StationName}";
-			}
-			else if (row.Value is BlockSignal blockSignal)
-			{
-				content = $"Bksig{((blockSignal.Speed == "40") ? "" : $"Bk{blockSignal.Speed}")} {blockSignal.StationName}";
-			}
-			else if (row.Value is EinfahrSignal einfahrSignal)
-			{
-				content = $"Esig{((einfahrSignal.Speed == "40") ? "" : $"E{einfahrSignal.Speed}")} {einfahrSignal.StationName}";
-			}
-			else if (row.Value is ZwischenSignal zwischenSignal)
-			{
-				content = $"Zsig{((zwischenSignal.Speed == "40") ? "" : $"Z{zwischenSignal.Speed}")} {zwischenSignal.StationName}";
-			}
-			
-			else if (row.Value is SelbstBlockSignal selbstBlockSignal)
-			{
-				content = $"Sbk {selbstBlockSignal.SignalNummer}";
-			}
-			else if (row.Value is BlockVorsignal blockVorsignal)
-			{
-				content = $"Bkvsig {blockVorsignal.SignalNummer}";
-			}
-			
-			else if (row.Value is Abzweigung abzweigung)
-			{
-				content = $"Abzweigung {abzweigung.Name}";
-			}
-			else if (row.Value is GSMRInfo gmsrInfo)
-			{
-				content = $"GSMR Info: {gmsrInfo.Info}";
-			}
-			else if (row.Value is LzbStart lzbStart)
-			{
-				content = $"LZB Start";
-			}
-			else if (row.Value is LzbEnd lzbEnd)
-			{
-				content = $"LZB End";
-			}
-			else if (row.Value is YenMarker yenMarker)
-			{
-				content = $"Yen marker";
-			}
-			
-			else if (row.Value is Station station)
-			{
-				content = $"Station: {station.Name} Arrival: {station.Arrival} Departure: {station.Departure}";
-			}
-			else if (row.Value is NoStopStation noStopStation)
-			{
-				// TODO: Save the departure time?
-				content = $"Station: {noStopStation.Name} Arrival: None Departure: None";
-			}
-			
-			else if (row.Value is UnknownContent unknownContent)
-			{
-				content = $"UnknownContent: {unknownContent.Content}";
-			}
+			string content = row.Value.GetPrint();
 			
 			Console.WriteLine($"[{row.Key}] {content}");
 		}
