@@ -218,7 +218,8 @@ internal static class Program
 				{
 					content = parser.ResolveContent(additionalText, arrivalTime, departureTime);
 
-					content = parser.CheckForDuplicateStation(content, arrivalTime, additionalText, rows);
+					if(!string.IsNullOrWhiteSpace(arrivalTime))
+						content = parser.CheckForDuplicateStation(content, arrivalTime, additionalText, rows);
 				}
 
 				if (content == null)
