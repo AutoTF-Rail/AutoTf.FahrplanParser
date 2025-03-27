@@ -137,4 +137,14 @@ public abstract class ParserBase
 		return stations.Any(x => x.Value is Station value && 
 		                         value.Arrival == arrivalTime && value.Name == stationName) ? null : station;
 	}
+
+	public RowContent? CheckForDuplicateContent(RowContent content, string hektometer, List<KeyValuePair<string, RowContent>> rows)
+	{
+		if (rows.Count == 0) 
+			return content;
+		
+		// TODO: Is this enough of a comparison? 
+		// TODO: Can we just use this for the station check too?
+		return rows.Any(x => x.Key == hektometer && x.Value.GetType() == content.GetType()) ? null : content;
+	}
 }
