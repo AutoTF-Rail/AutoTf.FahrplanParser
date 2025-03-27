@@ -170,8 +170,8 @@ internal static class Program
 					content = parser.CheckForDuplicateContent(content, hektometer, rows);
 					
 					// No need for a null check, since the method does it
-					if(!string.IsNullOrWhiteSpace(arrivalTime))
-						content = parser.CheckForDuplicateStation(content, arrivalTime, additionalText, rows);
+					// if(!string.IsNullOrWhiteSpace(arrivalTime))
+					// 	content = parser.CheckForDuplicateStation(content, arrivalTime, additionalText, rows);
 				}
 
 				if (content == null)

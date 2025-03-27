@@ -145,6 +145,7 @@ public abstract class ParserBase
 		
 		// TODO: Is this enough of a comparison? 
 		// TODO: Can we just use this for the station check too?
+		// TODO: Limit the check to the last 5? Since the last 5 are always only repeated?
 		return rows.Any(x => x.Key == hektometer && x.Value.GetType() == content.GetType()) ? null : content;
 	}
 }
