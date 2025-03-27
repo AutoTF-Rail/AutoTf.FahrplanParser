@@ -167,12 +167,13 @@ internal static class Program
 				else
 				{
 					content = parser.ResolveContent(additionalText, arrivalTime, departureTime);
-					content = parser.CheckForDuplicateContent(content, hektometer, rows);
 					
 					// No need for a null check, since the method does it
 					// if(!string.IsNullOrWhiteSpace(arrivalTime))
 					// 	content = parser.CheckForDuplicateStation(content, arrivalTime, additionalText, rows);
 				}
+				if(content != null)
+					content = parser.CheckForDuplicateContent(content, hektometer, rows);
 
 				if (content == null)
 					continue;
