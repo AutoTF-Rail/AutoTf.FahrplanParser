@@ -23,7 +23,6 @@ public static class MatExtensions
 
 	public static bool ContainsYellow(this Mat mat, Rectangle roi)
 	{
-		Console.WriteLine("Starting yellow check");
 		Mat roiMat = new Mat(mat, roi);
 
 		Mat hsv = new Mat();
@@ -39,7 +38,6 @@ public static class MatExtensions
 
 		int threshold = roi.Width * roi.Height / 20;
 
-		Console.WriteLine("Finished yellow check");
 		return nonZeroCount > threshold;
 	}
 }
