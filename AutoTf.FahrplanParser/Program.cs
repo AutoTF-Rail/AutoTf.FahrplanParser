@@ -63,8 +63,9 @@ internal static class Program
 		Parser parser = new Parser(engine);
 		
 		Mat mat = CvInvoke.Imread(file);
-		Mat rawMat = CvInvoke.Imread(file);
 		CvInvoke.CvtColor(mat, mat, ColorConversion.Bgr2Gray);
+		
+		Mat rawMat = CvInvoke.Imread(file);
 		
 		if (fileIndex == 0)
 		{
@@ -155,15 +156,15 @@ internal static class Program
 				
 				if (string.IsNullOrWhiteSpace(additionalText))
 				{
-					if (parser.IsLzbStart(mat, row))
+					if (parser.IsLzbStart(rawMat, row))
 					{
 						content = new LzbStart();
 					}
-					else if (parser.IsLzbEnd(mat, row))
+					else if (parser.IsLzbEnd(rawMat, row))
 					{
 						content = new LzbEnd();
 					}
-					else if (parser.IsYenMarker(mat, row))
+					else if (parser.IsYenMarker(rawMat, row))
 					{
 						content = new YenMarker();
 					}
