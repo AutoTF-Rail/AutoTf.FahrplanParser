@@ -29,8 +29,11 @@ public abstract class ParserBase
 			};
 		}
 
-		if (TryParseSignal(additionalText, out RowContent? content))
-			return content!;
+		if (TryParseSignal(additionalText, out RowContent? signalContent))
+			return signalContent!;
+		
+		if (TryParseMarker(additionalText, out RowContent? markerContent))
+			return markerContent!;
 		
 		// Other
 		if (additionalText.Contains("GSM-R"))
@@ -42,7 +45,6 @@ public abstract class ParserBase
 		return new UnknownContent(additionalText);
 	}
 
-	// Used for Esig etc to get the speed, and station name (both are optional)
 	private bool TryParseSignal(string additionalText, out RowContent? content)
 	{
 		content = null;
@@ -50,10 +52,12 @@ public abstract class ParserBase
 
 		Dictionary<string, string> signalMap = new Dictionary<string, string>
 		{
+			// U for unknown
 			{ "Esig", "E" },
 			{ "Asig", "A" },
 			{ "Bksig", "Bk" },
-			{ "Zsig", "Z" }
+			{ "Zsig", "Z" },
+			{ "Bkvsig", "U" },
 		};
 
 		string? sigType = signalMap.Keys.FirstOrDefault(additionalText.Contains);
@@ -81,6 +85,32 @@ public abstract class ParserBase
 			"Asig" => new AusfahrSignal(station, speed),
 			"Bksig" => new BlockSignal(station, speed),
 			"Zsig" => new ZwischenSignal(station, speed),
+			"Bkvsig" => new BlockVorsignal(station, speed),
+			_ => null
+		};
+
+		return content != null;
+	}
+	
+	private bool TryParseMarker(string additionalText, out RowContent? content)
+	{
+		content = null;
+
+		List<string> markers = new List<string>
+		{
+			{ "Abzw" }
+		};
+
+		string? markerType = markers.FirstOrDefault(additionalText.Contains);
+		
+		if (markerType == null) 
+			return false;
+		
+		string remainingText = additionalText.Replace(markerType, "").Trim();
+		
+		content = markerType switch
+		{
+			"Abzw" => new Abzweigung(remainingText),
 			_ => null
 		};
 
