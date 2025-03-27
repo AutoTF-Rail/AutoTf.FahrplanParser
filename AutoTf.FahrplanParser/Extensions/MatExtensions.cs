@@ -10,8 +10,7 @@ public static class MatExtensions
 	public static bool IsMoreBlackThanWhite(this Mat img)
 	{
 		Mat binaryImg = new Mat();
-		CvInvoke.CvtColor(img, binaryImg, ColorConversion.Bgr2Gray);
-		CvInvoke.Threshold(binaryImg, binaryImg, 128, 255, ThresholdType.Binary);
+		CvInvoke.Threshold(img, binaryImg, 128, 255, ThresholdType.Binary);
 
 		int whitePixels = CvInvoke.CountNonZero(binaryImg);
 		int totalPixels = img.Rows * img.Cols;

@@ -3,6 +3,7 @@ using AutoTf.FahrplanParser.Content;
 using AutoTf.FahrplanParser.Content.Signals;
 using AutoTf.FahrplanParser.Extensions;
 using Emgu.CV;
+using Emgu.CV.CvEnum;
 using Emgu.CV.OCR;
 
 namespace AutoTf.FahrplanParser;
@@ -62,7 +63,9 @@ internal static class Program
 		Parser parser = new Parser(engine);
 		
 		Mat mat = CvInvoke.Imread(file);
-			
+		CvInvoke.CvtColor(mat, mat, ColorConversion.Bgr2Gray);
+		CvInvoke.Threshold(mat, mat, 0, 255, ThresholdType.Binary | ThresholdType.Otsu);
+		
 		if (fileIndex == 0)
 		{
 			Console.WriteLine($"Date: {parser.Date(mat)} - {parser.Time(mat)}");
