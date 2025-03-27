@@ -72,19 +72,19 @@ internal static class Program
 			}
 			else if (row.Value is Abzweigung abzweigung)
 			{
-				content = $"Abzweigung: {abzweigung.AdditionalContent}";
+				content = $"Abzweigung";
 			}
 			else if (row.Value is GSMRInfo gmsrInfo)
 			{
-				content = $"GSMR Info: {gmsrInfo.AdditionalContent}";
+				content = $"GSMR Info: {gmsrInfo.Info}";
 			}
 			else if (row.Value is LzbStart lzbStart)
 			{
-				content = $"LZB Start {lzbStart.AdditionalContent}";
+				content = $"LZB Start";
 			}
 			else if (row.Value is LzbEnd lzbEnd)
 			{
-				content = $"LZB End {lzbEnd.AdditionalContent}";
+				content = $"LZB End";
 			}
 			else if (row.Value is Station station)
 			{
@@ -92,7 +92,7 @@ internal static class Program
 			}
 			else if (row.Value is YenMarker yenMarker)
 			{
-				content = $"Station {yenMarker.AdditionalContent}";
+				content = $"Yen marker";
 			}
 			else if (row.Value is UnknownContent unknownContent)
 			{
