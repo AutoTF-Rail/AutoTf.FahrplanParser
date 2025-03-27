@@ -138,7 +138,7 @@ internal static class Program
 				if (!string.IsNullOrWhiteSpace(speedLimit))
 				{
 					// Skip if yellow (repeating)
-					if (!mat.ContainsYellow(RegionMappings.YellowArea(row)))
+					if (!rawMat.ContainsYellow(RegionMappings.YellowArea(row)))
 					{
 						// Skip if already contained
 						if (speedChanges.Any())
