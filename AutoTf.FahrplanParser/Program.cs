@@ -184,6 +184,5 @@ internal static class Program
 			}
 		}
 		mat.Dispose();
-		rawMat.Dispose();
 	}
 }
