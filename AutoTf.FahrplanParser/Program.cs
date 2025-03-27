@@ -106,7 +106,7 @@ internal static class Program
 
 				RowContent? content = parser.ResolveContent(additionalText, arrivalTime, departureTime);
 				
-				content = parser.CheckForDuplicateStation(content, arrivalTime, additionalText, rows);
+				content = parser.CheckForDuplicateContent(content, hektometer, rows);
 				
 				if(content == null)
 					continue;
