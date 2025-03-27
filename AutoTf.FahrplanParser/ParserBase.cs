@@ -58,11 +58,13 @@ public abstract class ParserBase
 			{ "Bksig", "Bk" },
 			{ "Zsig", "Z" },
 			{ "Bkvsig", "U" },
+			{ "Sbk", "U" },
 		};
+		// TODO: Does a Bksig have the option for speed? Because it can carry the signal ID too (Same for Sbk)
 
 		string? sigType = signalMap.Keys.FirstOrDefault(additionalText.Contains);
 		
-		if (sigType == null) 
+		if (sigType == null)
 			return false;
 		
 		string speedId = signalMap[sigType];
@@ -77,15 +79,14 @@ public abstract class ParserBase
 			remainingText = remainingText.Replace(speed, "").Trim();
 		}
 		
-		string station = remainingText;
-		
 		content = sigType switch
 		{
-			"Esig" => new EinfahrSignal(station, speed),
-			"Asig" => new AusfahrSignal(station, speed),
-			"Bksig" => new BlockSignal(station, speed),
-			"Zsig" => new ZwischenSignal(station, speed),
-			"Bkvsig" => new BlockVorsignal(station, speed),
+			"Esig" => new EinfahrSignal(remainingText, speed),
+			"Asig" => new AusfahrSignal(remainingText, speed),
+			"Bksig" => new BlockSignal(remainingText, speed),
+			"Zsig" => new ZwischenSignal(remainingText, speed),
+			"Bkvsig" => new BlockVorsignal(remainingText, speed),
+			"Sbk" => new SelbstBlockSignal(remainingText),
 			_ => null
 		};
 

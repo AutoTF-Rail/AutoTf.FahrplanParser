@@ -62,11 +62,11 @@ internal static class Program
 			}
 			else if (row.Value is EinfahrSignal einfahrSignal)
 			{
-				content = $"Einfahr: Speed: {einfahrSignal.Speed} Station: {einfahrSignal.StationName}";
+				content = $"EinfahrSignal: Speed: {einfahrSignal.Speed} Station: {einfahrSignal.StationName}";
 			}
 			else if (row.Value is SelbstBlockSignal selbstBlockSignal)
 			{
-				content = $"SelbstBlockSignal: Speed: {selbstBlockSignal.Speed} Station: {selbstBlockSignal.StationName}";
+				content = $"SelbstBlockSignal {selbstBlockSignal.SignalNummer}";
 			}
 			else if (row.Value is ZwischenSignal zwischenSignal)
 			{
@@ -74,7 +74,7 @@ internal static class Program
 			}
 			else if (row.Value is Abzweigung abzweigung)
 			{
-				content = $"Abzweigung";
+				content = $"Abzweigung {abzweigung.Name}";
 			}
 			else if (row.Value is GSMRInfo gmsrInfo)
 			{

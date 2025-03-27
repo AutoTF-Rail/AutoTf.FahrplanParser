@@ -5,12 +5,10 @@ namespace AutoTf.FahrplanParser.Content.Signals;
 /// </summary>
 public class SelbstBlockSignal : RowContent
 {
-	public SelbstBlockSignal(string stationName, string speed)
+	public SelbstBlockSignal(string signalNummer)
 	{
-		StationName = stationName;
-		Speed = speed;
+		SignalNummer = signalNummer;
 	}
 
-	public string StationName { get; set; }
-	public string Speed { get; set; }
+	public string SignalNummer { get; set; }
 }
