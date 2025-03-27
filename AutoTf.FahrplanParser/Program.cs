@@ -43,6 +43,8 @@ internal static class Program
 			Console.WriteLine($"[{station.Key}] Arrive at {stationVar.Arrival} and depart at {stationVar.Departure} from {stationVar.Name}.");
 		}
 		
+		Console.WriteLine(Environment.NewLine + Environment.NewLine);
+		
 		foreach (KeyValuePair<string,RowContent> row in rows)
 		{
 			string content = string.Empty;
