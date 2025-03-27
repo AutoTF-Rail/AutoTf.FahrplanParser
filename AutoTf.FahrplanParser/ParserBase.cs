@@ -35,6 +35,12 @@ public abstract class ParserBase
 		if (TryParseMarker(additionalText, out RowContent? markerContent))
 			return markerContent!;
 		
+		// Important to do this AFTER the markers, because Abzw could have a departure time too
+		
+		// TODO: Gibt es stationen die notiert sind, aber auch keine abfahrts zeit haben?
+		if (string.IsNullOrWhiteSpace(arrivalTime) && !string.IsNullOrWhiteSpace(departureTime))
+			return new NoStopStation(additionalText);
+		
 		// Other
 		if (additionalText.Contains("GSM-R"))
 		{
