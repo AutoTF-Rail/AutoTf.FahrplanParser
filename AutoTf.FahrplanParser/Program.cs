@@ -90,14 +90,21 @@ internal static class Program
 			{
 				content = $"LZB End";
 			}
-			else if (row.Value is Station station)
-			{
-				content = $"Station: {station.Name} Arrival: {station.Arrival} Departure: {station.Departure}";
-			}
 			else if (row.Value is YenMarker yenMarker)
 			{
 				content = $"Yen marker";
 			}
+			
+			else if (row.Value is Station station)
+			{
+				content = $"Station: {station.Name} Arrival: {station.Arrival} Departure: {station.Departure}";
+			}
+			else if (row.Value is NoStopStation noStopStation)
+			{
+				// TODO: Save the departure time?
+				content = $"Station: {noStopStation.Name} Arrival: None Departure: None";
+			}
+			
 			else if (row.Value is UnknownContent unknownContent)
 			{
 				content = $"UnknownContent: {unknownContent.Content}";
