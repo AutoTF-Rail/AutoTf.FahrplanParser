@@ -22,7 +22,7 @@ internal static class Program
 		List<KeyValuePair<string, RowContent>> rows = new List<KeyValuePair<string, RowContent>>();
 
 		int fileIndex = 0;
-		List<string> files = Directory.GetFiles("FahrplanData/").ToList();
+		List<string> files = Directory.GetFiles("FahrplanData/ExampleOne").ToList();
 		files.Sort();
 		
 		foreach (string file in files)
