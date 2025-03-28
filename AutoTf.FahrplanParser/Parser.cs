@@ -52,19 +52,27 @@ public class Parser : ParserBase
 	{
 		content = null;
 		
-		Mat iconArea = GetIconArea(mat, row);
-					
-		if (LzbStart.TryParseIcon(iconArea))
-			content = new LzbStart();
-		else if (LzbEnd.TryParseIcon(iconArea))
-			content = new LzbEnd();
-		else if (YenMarker.TryParseIcon(iconArea))
-			content = new YenMarker();
-		else if (Stumpfgleis.TryParseIcon(iconArea))
-			content = new Stumpfgleis();
-		
-		iconArea.Dispose();
+		try
+		{
+			Mat iconArea = GetIconArea(mat, row);
 
-		return content == null;
+			if (LzbStart.TryParseIcon(iconArea))
+				content = new LzbStart();
+			else if (LzbEnd.TryParseIcon(iconArea))
+				content = new LzbEnd();
+			else if (YenMarker.TryParseIcon(iconArea))
+				content = new YenMarker();
+			else if (Stumpfgleis.TryParseIcon(iconArea))
+				content = new Stumpfgleis();
+
+			iconArea.Dispose();
+
+			return content == null;
+		}
+		catch
+		{
+			// TODO: log?
+			return false;
+		}
 	}
 }

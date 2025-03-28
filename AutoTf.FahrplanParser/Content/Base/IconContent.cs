@@ -26,7 +26,6 @@ public abstract class IconContent : RowContent
 		Mat result = new Mat(resultRows, resultCols, DepthType.Cv32F, 1);
 
 		CvInvoke.MatchTemplate(area, icon, result, TemplateMatchingType.CcoeffNormed);
-		result.Dispose();
 
 		double minVal = 0;
 		double maxVal = 0;
@@ -34,6 +33,7 @@ public abstract class IconContent : RowContent
 		Point maxLoc = Point.Empty;
 
 		CvInvoke.MinMaxLoc(result, ref minVal, ref maxVal, ref minLoc, ref maxLoc);
+		result.Dispose();;
 
 		double threshold = 0.8;
 		return maxVal >= threshold;
