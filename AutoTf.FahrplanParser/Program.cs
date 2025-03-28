@@ -53,6 +53,16 @@ internal static class Program
 			
 			Console.WriteLine($"[{row.Key}] {content}");
 		}
+		
+		Console.WriteLine(Environment.NewLine + Environment.NewLine);
+		Console.WriteLine("Unknown:");
+		
+		foreach (KeyValuePair<string,RowContent> row in rows.Where(x => x.Value is UnknownContent))
+		{
+			string content = row.Value.GetPrint();
+			
+			Console.WriteLine($"[{row.Key}] {content}");
+		}
 
 		return Task.CompletedTask;
 	}
