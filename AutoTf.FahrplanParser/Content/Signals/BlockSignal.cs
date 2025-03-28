@@ -1,9 +1,11 @@
+using AutoTf.FahrplanParser.Content.Base;
+
 namespace AutoTf.FahrplanParser.Content.Signals;
 
 /// <summary>
 /// Bksig
 /// </summary>
-public class BlockSignal : RowContent
+public class BlockSignal : SignalContent
 {
 	public BlockSignal(string stationName, string speed)
 	{
@@ -22,5 +24,16 @@ public class BlockSignal : RowContent
 			speed = $"Bk{Speed}";
 
 		return $"Bksig{speed} {StationName}";
+	}
+
+	public static bool TryParse(string additionalText, out RowContent? content)
+	{
+		content = null;
+		
+		if (!TryParse(additionalText, "Bksig", "Bk", out string speed, out string stationName))
+			return false;
+
+		content = new BlockSignal(stationName, speed);
+		return true;
 	}
 }

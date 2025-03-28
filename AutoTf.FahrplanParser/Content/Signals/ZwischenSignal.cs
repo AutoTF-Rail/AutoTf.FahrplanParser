@@ -1,9 +1,11 @@
+using AutoTf.FahrplanParser.Content.Base;
+
 namespace AutoTf.FahrplanParser.Content.Signals;
 
 /// <summary>
 /// Zsig
 /// </summary>
-public class ZwischenSignal : RowContent
+public class ZwischenSignal : SignalContent
 {
 	public ZwischenSignal(string stationName, string speed)
 	{
@@ -22,5 +24,16 @@ public class ZwischenSignal : RowContent
 			speed = $" Z{Speed}";
 
 		return $"Zsig{speed} {StationName}";
+	}
+
+	public static bool TryParse(string additionalText, out RowContent? content)
+	{
+		content = null;
+		
+		if (!TryParse(additionalText, "Zsig", "Z", out string speed, out string stationName))
+			return false;
+
+		content = new ZwischenSignal(stationName, speed);
+		return true;
 	}
 }

@@ -1,7 +1,10 @@
+using System.Drawing;
 using System.Text.RegularExpressions;
 using AutoTf.FahrplanParser.Content;
 using AutoTf.FahrplanParser.Content.Signals;
 using AutoTf.FahrplanParser.Content.Signals.Vorsignal;
+using Emgu.CV;
+using Emgu.CV.CvEnum;
 using Emgu.CV.OCR;
 
 namespace AutoTf.FahrplanParser;
@@ -75,51 +78,28 @@ public abstract class ParserBase
 
 	private bool TryParseSignal(string additionalText, out RowContent? content)
 	{
-		content = null;
-		string speed = "40";
+		if (AusfahrVorsignal.TryParse(additionalText, out content))
+			return true;
+		
+		if (BlockVorsignal.TryParse(additionalText, out content))
+			return true;
+		
+		if (AusfahrSignal.TryParse(additionalText, out content))
+			return true;
+		
+		if (BlockSignal.TryParse(additionalText, out content))
+			return true;
+		
+		if (EinfahrSignal.TryParse(additionalText, out content))
+			return true;
+		
+		if (SelbstBlockSignal.TryParse(additionalText, out content))
+			return true;
+		
+		if (ZwischenSignal.TryParse(additionalText, out content))
+			return true;
 
-		Dictionary<string, string> signalMap = new Dictionary<string, string>
-		{
-			// U for unknown
-			{ "Esig", "E" },
-			{ "Asig", "A" },
-			{ "Bksig", "Bk" },
-			{ "Zsig", "Z" },
-			{ "Bkvsig", "U" },
-			{ "Sbk", "U" },
-		};
-		// TODO: Does a Bksig have the option for speed? Because it can carry the signal ID too (Same for Sbk)
-
-		string? sigType = signalMap.Keys.FirstOrDefault(additionalText.Contains);
-		
-		if (sigType == null)
-			return false;
-		
-		string speedId = signalMap[sigType];
-		
-		string remainingText = additionalText.Replace(sigType, "").Trim();
-		
-		Match match = Regex.Match(remainingText, @$"{speedId}\d+");
-		
-		if (match.Success)
-		{
-			speed = match.Value;
-			remainingText = remainingText.Replace(speed, "").Trim();
-		}
-		
-		content = sigType switch
-		{
-			"Esig" => new EinfahrSignal(remainingText, speed),
-			"Asig" => new AusfahrSignal(remainingText, speed),
-			"Avsig" => new AusfahrVorsignal(remainingText),
-			"Bksig" => new BlockSignal(remainingText, speed),
-			"Zsig" => new ZwischenSignal(remainingText, speed),
-			"Bkvsig" => new BlockVorsignal(remainingText),
-			"Sbk" => new SelbstBlockSignal(remainingText),
-			_ => null
-		};
-
-		return content != null;
+		return false;
 	}
 	
 	private bool TryParseMarker(string additionalText, out RowContent? content)
@@ -153,6 +133,30 @@ public abstract class ParserBase
 		};
 
 		return content != null;
+	}
+	
+	public Mat GetIconArea(Mat mat, Rectangle row)
+	{
+		Rectangle roi = new Rectangle(row.X + 386, row.Y, 60, 44);
+		Mat area = new Mat(mat, roi);
+		CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
+
+		if (area.NumberOfChannels != 1)
+			CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
+
+		return area;
+	}
+
+	protected static string ExtractTextClean(Rectangle roi, Mat mat, Tesseract engine) => ExtractText(roi, mat, engine).Replace("\n", "");
+
+	protected static string ExtractText(Rectangle roi, Mat mat, Tesseract engine)
+	{
+		using Mat roiMat = new Mat(mat, roi);
+		using Pix pix = new Pix(roiMat);
+		
+		engine.SetImage(pix);
+		
+		return engine.GetUTF8Text().Trim();
 	}
 	
 	public RowContent? CheckForDuplicateContent(RowContent content, string hektometer, List<KeyValuePair<string, RowContent>> rows)

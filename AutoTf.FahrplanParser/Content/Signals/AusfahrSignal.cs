@@ -1,9 +1,11 @@
+using AutoTf.FahrplanParser.Content.Base;
+
 namespace AutoTf.FahrplanParser.Content.Signals;
 
 /// <summary>
 /// Asig
 /// </summary>
-public class AusfahrSignal : RowContent
+public class AusfahrSignal : SignalContent
 {
 	public AusfahrSignal(string stationName, string speed = "40")
 	{
@@ -22,5 +24,16 @@ public class AusfahrSignal : RowContent
 			speed = $" A{Speed}";
 
 		return $"Asig{speed} {StationName}";
+	}
+
+	public static bool TryParse(string additionalText, out RowContent? content)
+	{
+		content = null;
+		
+		if (!TryParse(additionalText, "Asig", "A", out string speed, out string stationName))
+			return false;
+
+		content = new AusfahrSignal(stationName, speed);
+		return true;
 	}
 }

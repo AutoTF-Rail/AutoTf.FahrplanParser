@@ -1,9 +1,11 @@
+using AutoTf.FahrplanParser.Content.Base;
+
 namespace AutoTf.FahrplanParser.Content.Signals.Vorsignal;
 
 /// <summary>
 /// Avsig
 /// </summary>
-public class AusfahrVorsignal : RowContent
+public class AusfahrVorsignal : SignalContent
 {
 	public AusfahrVorsignal(string signalNummer)
 	{
@@ -14,6 +16,17 @@ public class AusfahrVorsignal : RowContent
 	
 	public override string GetPrint()
 	{
-		return $"Bkvsig {SignalNummer}";
+		return $"Avsig {SignalNummer}";
+	}
+
+	public static bool TryParse(string additionalText, out RowContent? content)
+	{
+		content = null;
+		
+		if (!TryParse(additionalText, "Avsig", "U", out string speed, out string signalNummer))
+			return false;
+
+		content = new AusfahrVorsignal(signalNummer);
+		return true;
 	}
 }

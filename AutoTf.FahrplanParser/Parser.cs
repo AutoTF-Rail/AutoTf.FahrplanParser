@@ -1,4 +1,5 @@
 using System.Drawing;
+using AutoTf.FahrplanParser.Content;
 using AutoTf.FahrplanParser.Extensions;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
@@ -9,18 +10,6 @@ namespace AutoTf.FahrplanParser;
 public class Parser : ParserBase
 {
 	public Parser(Tesseract engine) : base(engine) { }
-
-	private static string ExtractTextClean(Rectangle roi, Mat mat, Tesseract engine) => ExtractText(roi, mat, engine).Replace("\n", "");
-
-	private static string ExtractText(Rectangle roi, Mat mat, Tesseract engine)
-	{
-		using Mat roiMat = new Mat(mat, roi);
-		using Pix pix = new Pix(roiMat);
-		
-		engine.SetImage(pix);
-		
-		return engine.GetUTF8Text().Trim();
-	}
 
 	public string Date(Mat mat) => ExtractTextClean(RegionMappings.Date, mat, Engine).Replace("\n", "");
 
@@ -59,62 +48,23 @@ public class Parser : ParserBase
 		return null;
 	}
 
-	public bool IsStumpfgleis(Mat mat, Rectangle row)
+	public bool TryParseIcon(Mat mat, Rectangle row, out RowContent? content)
 	{
-		Mat lzbStartIcon = CvInvoke.Imread("Icons/StumpfgleisIcon.png", ImreadModes.Grayscale);
+		content = null;
 		
-		return SearchForIcon(mat, lzbStartIcon, row);
-	}
+		Mat iconArea = GetIconArea(mat, row);
+					
+		if (LzbStart.TryParseIcon(iconArea))
+			content = new LzbStart();
+		else if (LzbEnd.TryParseIcon(iconArea))
+			content = new LzbEnd();
+		else if (YenMarker.TryParseIcon(iconArea))
+			content = new YenMarker();
+		else if (Stumpfgleis.TryParseIcon(iconArea))
+			content = new Stumpfgleis();
+		
+		iconArea.Dispose();
 
-	public bool IsYenMarker(Mat mat, Rectangle row)
-	{
-		Mat lzbStartIcon = CvInvoke.Imread("Icons/YenIcon.png", ImreadModes.Grayscale);
-		
-		return SearchForIcon(mat, lzbStartIcon, row);
-	}
-
-	public bool IsLzbStart(Mat mat, Rectangle row)
-	{
-		Mat lzbStartIcon = CvInvoke.Imread("Icons/LzbStartIcon.png", ImreadModes.Grayscale);
-		
-		return SearchForIcon(mat, lzbStartIcon, row);
-	}
-
-	public bool IsLzbEnd(Mat mat, Rectangle row)
-	{
-		Mat lzbStartIcon = CvInvoke.Imread("Icons/LzbEndeIcon.png", ImreadModes.Grayscale);
-		
-		return SearchForIcon(mat, lzbStartIcon, row);
-	}
-	
-	private bool SearchForIcon(Mat mat, Mat icon, Rectangle row)
-	{
-		Rectangle roi = new Rectangle(row.X + 386, row.Y, 60, 44);
-		
-		Mat area = new Mat(mat, roi);
-		CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
-		
-		if (area.NumberOfChannels != 1)
-			CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
-		
-		if (icon.NumberOfChannels != 1)
-			CvInvoke.CvtColor(icon, icon, ColorConversion.Bgr2Gray);
-		
-		int resultCols = area.Cols - icon.Cols + 1;
-		int resultRows = area.Rows - icon.Rows + 1;
-		Mat result = new Mat(resultRows, resultCols, DepthType.Cv32F, 1);
-		
-		CvInvoke.MatchTemplate(area, icon, result, TemplateMatchingType.CcoeffNormed);
-		
-		double minVal = 0;
-		double maxVal = 0;
-		Point minLoc = Point.Empty;
-		Point maxLoc = Point.Empty;
-		
-		CvInvoke.MinMaxLoc(result, ref minVal, ref maxVal, ref minLoc, ref maxLoc);
-
-		double threshold = 0.8;
-
-		return maxVal >= threshold;
+		return content == null;
 	}
 }

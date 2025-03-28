@@ -1,10 +1,12 @@
+using AutoTf.FahrplanParser.Content.Base;
+
 namespace AutoTf.FahrplanParser.Content.Signals;
 
 /// <summary>
 /// Esig
 /// </summary>
 // TODO: Make like a attribute instead showing the meaning in a fahrplan?
-public class EinfahrSignal : RowContent
+public class EinfahrSignal : SignalContent
 {
 	public EinfahrSignal(string stationName, string speed = "40")
 	{
@@ -26,5 +28,16 @@ public class EinfahrSignal : RowContent
 			speed = $" E{Speed}";
 
 		return $"Esig{speed} {StationName}";
+	}
+
+	public static bool TryParse(string additionalText, out RowContent? content)
+	{
+		content = null;
+		
+		if (!TryParse(additionalText, "Esig", "E", out string speed, out string stationName))
+			return false;
+
+		content = new EinfahrSignal(stationName, speed);
+		return true;
 	}
 }

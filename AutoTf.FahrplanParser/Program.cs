@@ -1,9 +1,7 @@
 ﻿using System.Drawing;
 using AutoTf.FahrplanParser.Content;
-using AutoTf.FahrplanParser.Content.Signals;
 using AutoTf.FahrplanParser.Extensions;
 using Emgu.CV;
-using Emgu.CV.CvEnum;
 using Emgu.CV.OCR;
 
 namespace AutoTf.FahrplanParser;
@@ -163,22 +161,8 @@ internal static class Program
 				
 				if (string.IsNullOrWhiteSpace(additionalText))
 				{
-					if (parser.IsLzbStart(mat, row))
-					{
-						content = new LzbStart();
-					}
-					else if (parser.IsLzbEnd(mat, row))
-					{
-						content = new LzbEnd();
-					}
-					else if (parser.IsYenMarker(mat, row))
-					{
-						content = new YenMarker();
-					}
-					else if (parser.IsStumpfgleis(mat, row))
-					{
-						content = new Stumpfgleis();
-					}
+					if (parser.TryParseIcon(mat, row, out RowContent? result))
+						content = result;
 				}
 				else
 				{
