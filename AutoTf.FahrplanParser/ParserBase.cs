@@ -1,10 +1,7 @@
-using System.Drawing;
 using System.Text.RegularExpressions;
 using AutoTf.FahrplanParser.Content;
 using AutoTf.FahrplanParser.Content.Signals;
 using AutoTf.FahrplanParser.Content.Signals.Vorsignal;
-using Emgu.CV;
-using Emgu.CV.CvEnum;
 using Emgu.CV.OCR;
 
 namespace AutoTf.FahrplanParser;
@@ -18,10 +15,18 @@ public abstract class ParserBase
 		Engine = engine;
 	}
 
-	public RowContent ResolveContent(string additionalText, string arrivalTime, string departureTime)
+	public RowContent? ResolveContent(string additionalText, string arrivalTime, string departureTime)
 	{
+		// Next row says "*1) Kopf machen" but the *1) here doesn't matter afaik
+		if (arrivalTime.Contains("*1)"))
+			return null;
+		
 		if (!string.IsNullOrWhiteSpace(arrivalTime) && !string.IsNullOrWhiteSpace(departureTime))
 		{
+			if (arrivalTime.Trim() == "X")
+			{
+				// TODO: Handle this case?
+			}
 			return new Station()
 			{
 				Name = additionalText,
@@ -51,7 +56,19 @@ public abstract class ParserBase
 			
 			return new ZugFunk(additionalText);
 		}
+		
+		// TODO: Is the number here at any time different? Maybe führerstand ID?
+		// TODO: This never has a hektometer, but we still need to assign it to one? 
+		if (additionalText.Contains("Kopf machen"))
+			return new SwitchSide();
 
+		if (additionalText.Contains("Bü"))
+		{
+			// TODO: Is this "ET" of any importance?/Is there a different sign sometimes?
+			string kilometer = additionalText.Replace("Bü", "").Replace("km", "").Replace("ET", "");
+			return new Bahnübergang(kilometer);
+		}
+		
 		// TODO: Continue cases
 		return new UnknownContent(additionalText);
 	}
@@ -94,6 +111,7 @@ public abstract class ParserBase
 		{
 			"Esig" => new EinfahrSignal(remainingText, speed),
 			"Asig" => new AusfahrSignal(remainingText, speed),
+			"Avsig" => new AusfahrVorsignal(remainingText),
 			"Bksig" => new BlockSignal(remainingText, speed),
 			"Zsig" => new ZwischenSignal(remainingText, speed),
 			"Bkvsig" => new BlockVorsignal(remainingText),
@@ -110,7 +128,11 @@ public abstract class ParserBase
 
 		List<string> markers = new List<string>
 		{
-			{ "Abzw" }
+			{ "Abzw" },
+			{ "Üst" },
+			{ "Übf" },
+			{ "Awamst" },
+			{ "Anst" },
 		};
 
 		string? markerType = markers.FirstOrDefault(additionalText.Contains);
@@ -123,26 +145,16 @@ public abstract class ParserBase
 		content = markerType switch
 		{
 			"Abzw" => new Abzweigung(remainingText),
+			"Üst" => new Überleitstelle(remainingText),
+			"Übf" => new Überholbahnhof(remainingText),
+			"Awamst" => new Ausweichanschlussstelle(remainingText),
+			"Anst" => new Anschlussstelle(remainingText),
 			_ => null
 		};
 
 		return content != null;
 	}
-
-	public RowContent? CheckForDuplicateStation(RowContent content, string arrivalTime, string stationName, List<KeyValuePair<string, RowContent>> knownStations)
-	{
-		if (content is not Station station)
-			return null;
-
-		if (knownStations.Count == 0) 
-			return station;
-		
-		List<KeyValuePair<string, RowContent>> stations = knownStations.Where(x => x.Value is Station).ToList();
-
-		return stations.Any(x => x.Value is Station value && 
-		                         value.Arrival == arrivalTime && value.Name == stationName) ? null : station;
-	}
-
+	
 	public RowContent? CheckForDuplicateContent(RowContent content, string hektometer, List<KeyValuePair<string, RowContent>> rows)
 	{
 		if (rows.Count == 0) 

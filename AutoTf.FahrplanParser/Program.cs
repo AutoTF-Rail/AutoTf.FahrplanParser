@@ -165,6 +165,10 @@ internal static class Program
 					{
 						content = new YenMarker();
 					}
+					else if (parser.IsStumpfgleis(mat, row))
+					{
+						content = new Stumpfgleis();
+					}
 				}
 				else
 				{

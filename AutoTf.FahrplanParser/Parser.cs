@@ -59,6 +59,13 @@ public class Parser : ParserBase
 		return null;
 	}
 
+	public bool IsStumpfgleis(Mat mat, Rectangle row)
+	{
+		Mat lzbStartIcon = CvInvoke.Imread("Icons/StumpfgleisIcon.png", ImreadModes.Grayscale);
+		
+		return SearchForIcon(mat, lzbStartIcon, row);
+	}
+
 	public bool IsYenMarker(Mat mat, Rectangle row)
 	{
 		Mat lzbStartIcon = CvInvoke.Imread("Icons/YenIcon.png", ImreadModes.Grayscale);
