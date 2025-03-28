@@ -8,7 +8,7 @@ namespace AutoTf.FahrplanParser.Content.Signals.Vorsignal;
 public class BlockVorsignal : SignalContent
 {
 	// TODO: Verkürzungen mit "v" gekennzeichnet hinzufügen
-	public BlockVorsignal(string signalNummer)
+	private BlockVorsignal(string signalNummer)
 	{
 		SignalNummer = signalNummer;
 	}
@@ -24,7 +24,7 @@ public class BlockVorsignal : SignalContent
 	{
 		content = null;
 		
-		if (!TryParse(additionalText, "Bkvsig", "U", out string speed, out string signalNummer))
+		if (!TryParse(additionalText, "Bkvsig", "U", out string _, out string signalNummer))
 			return false;
 
 		content = new BlockVorsignal(signalNummer);

@@ -1,15 +1,15 @@
 using AutoTf.FahrplanParser.Content.Base;
 using Emgu.CV;
 
-namespace AutoTf.FahrplanParser.Content;
+namespace AutoTf.FahrplanParser.Content.Icons;
 
-public class LzbEnd : IconContent
+public class LzbStart : IconContent
 {
-	private const string FileName = "Icons/LzbEndeIcon.png";
-	
+	private const string FileName = "Icons/LzbStartIcon.png";
+
 	public override string GetPrint()
 	{
-		return "LZB Ende";
+		return "LZB Start";
 	}
 	
 	public static bool TryParseIcon(Mat area)

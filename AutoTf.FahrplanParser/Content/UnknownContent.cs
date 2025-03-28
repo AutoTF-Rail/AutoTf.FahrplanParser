@@ -1,3 +1,5 @@
+using AutoTf.FahrplanParser.Content.Base;
+
 namespace AutoTf.FahrplanParser.Content;
 
 public class UnknownContent : RowContent

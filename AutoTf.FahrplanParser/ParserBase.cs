@@ -1,6 +1,8 @@
 using System.Drawing;
-using System.Text.RegularExpressions;
 using AutoTf.FahrplanParser.Content;
+using AutoTf.FahrplanParser.Content.Base;
+using AutoTf.FahrplanParser.Content.Icons;
+using AutoTf.FahrplanParser.Content.Markers;
 using AutoTf.FahrplanParser.Content.Signals;
 using AutoTf.FahrplanParser.Content.Signals.Vorsignal;
 using Emgu.CV;
@@ -18,62 +20,71 @@ public abstract class ParserBase
 		Engine = engine;
 	}
 
+	public bool TryParseIcon(Mat mat, Rectangle row, out RowContent? content)
+	{
+		content = null;
+		
+		try
+		{
+			Mat iconArea = GetIconArea(mat, row);
+
+			if (LzbStart.TryParseIcon(iconArea))
+				content = new LzbStart();
+			else if (LzbEnd.TryParseIcon(iconArea))
+				content = new LzbEnd();
+			else if (YenMarker.TryParseIcon(iconArea))
+				content = new YenMarker();
+			else if (Stumpfgleis.TryParseIcon(iconArea))
+				content = new Stumpfgleis();
+
+			iconArea.Dispose();
+
+			return content == null;
+		}
+		catch
+		{
+			// TODO: log?
+			return false;
+		}
+	}
+
 	public RowContent? ResolveContent(string additionalText, string arrivalTime, string departureTime)
 	{
 		// Next row says "*1) Kopf machen" but the *1) here doesn't matter afaik
 		if (arrivalTime.Contains("*1)"))
 			return null;
 		
-		if (!string.IsNullOrWhiteSpace(arrivalTime) && !string.IsNullOrWhiteSpace(departureTime))
-		{
-			if (arrivalTime.Trim() == "X")
-			{
-				// TODO: Handle this case?
-			}
-			return new Station()
-			{
-				Name = additionalText,
-				Arrival = arrivalTime,
-				Departure = departureTime
-			};
-		}
-
 		if (TryParseSignal(additionalText, out RowContent? signalContent))
 			return signalContent!;
 		
 		if (TryParseMarker(additionalText, out RowContent? markerContent))
 			return markerContent!;
 		
-		// Important to do this AFTER the markers, because Abzw could have a departure time too
+		// Important to do this AFTER the markers, because Abzw and others could have a departure time too
+		if (TryParseStation(additionalText, arrivalTime, departureTime, out RowContent? stationContent))
+			return stationContent!;
 		
-		// TODO: Gibt es stationen die notiert sind, aber auch keine abfahrts zeit haben?
-		if (string.IsNullOrWhiteSpace(arrivalTime) && !string.IsNullOrWhiteSpace(departureTime))
-			return new NoStopStation(additionalText);
-		
-		// Other
-		if (additionalText.Contains("ZF"))
-		{
-			additionalText = additionalText.Replace("ZF", "").Replace("-", "").Trim();
-			if (additionalText.Contains("ENDE"))
-				return new ZugFunkEnde();
-			
-			return new ZugFunk(additionalText);
-		}
-		
-		// TODO: Is the number here at any time different? Maybe führerstand ID?
-		// TODO: This never has a hektometer, but we still need to assign it to one? 
-		if (additionalText.Contains("Kopf machen"))
-			return new SwitchSide();
-
-		if (additionalText.Contains("Bü"))
-		{
-			// TODO: Is this "ET" of any importance?/Is there a different sign sometimes?
-			string kilometer = additionalText.Replace("Bü", "").Replace("km", "").Replace("ET", "");
-			return new Bahnübergang(kilometer);
-		}
-		
-		// TODO: Continue cases
 		return new UnknownContent(additionalText);
+	}
+
+	private bool TryParseStation(string additionalText, string arrival, string departure, out RowContent? content)
+	{
+		content = null;
+		
+		try
+		{
+			if (Station.TryParse(additionalText, arrival, departure, out content))
+				return true;
+			
+			if (NoStopStation.TryParse(additionalText, arrival, departure, out content))
+				return true;
+			
+			return false;
+		}
+		catch
+		{
+			return false;
+		}
 	}
 
 	private bool TryParseSignal(string additionalText, out RowContent? content)
@@ -106,36 +117,41 @@ public abstract class ParserBase
 	{
 		content = null;
 
-		List<string> markers = new List<string>
+		try
 		{
-			{ "Abzw" },
-			{ "Üst" },
-			{ "Übf" },
-			{ "Awamst" },
-			{ "Anst" },
-		};
+			if (Abzweigung.TryParse(additionalText, out content))
+				return true;
+			
+			if (Anschlussstelle.TryParse(additionalText, out content))
+				return true;
+			
+			if (Ausweichanschlussstelle.TryParse(additionalText, out content))
+				return true;
+			
+			if (Bahnuebergang.TryParse(additionalText, out content))
+				return true;
+			
+			if (SwitchSide.TryParse(additionalText, out content))
+				return true;
+			
+			if (Ueberholbahnhof.TryParse(additionalText, out content))
+				return true;
+			
+			if (Ueberleitstelle.TryParse(additionalText, out content))
+				return true;
+			
+			if (ZugFunk.TryParse(additionalText, out content))
+				return true;
 
-		string? markerType = markers.FirstOrDefault(additionalText.Contains);
-		
-		if (markerType == null) 
 			return false;
-		
-		string remainingText = additionalText.Replace(markerType, "").Trim();
-		
-		content = markerType switch
+		}
+		catch
 		{
-			"Abzw" => new Abzweigung(remainingText),
-			"Üst" => new Überleitstelle(remainingText),
-			"Übf" => new Überholbahnhof(remainingText),
-			"Awamst" => new Ausweichanschlussstelle(remainingText),
-			"Anst" => new Anschlussstelle(remainingText),
-			_ => null
-		};
-
-		return content != null;
+			return false;
+		}
 	}
-	
-	public Mat GetIconArea(Mat mat, Rectangle row)
+
+	private Mat GetIconArea(Mat mat, Rectangle row)
 	{
 		Rectangle roi = new Rectangle(row.X + 386, row.Y, 60, 44);
 		Mat area = new Mat(mat, roi);

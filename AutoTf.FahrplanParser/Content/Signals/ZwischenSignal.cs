@@ -7,7 +7,7 @@ namespace AutoTf.FahrplanParser.Content.Signals;
 /// </summary>
 public class ZwischenSignal : SignalContent
 {
-	public ZwischenSignal(string stationName, string speed)
+	private ZwischenSignal(string stationName, string speed)
 	{
 		StationName = stationName;
 		Speed = speed;

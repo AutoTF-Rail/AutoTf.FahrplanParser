@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using AutoTf.FahrplanParser.Content;
+using AutoTf.FahrplanParser.Content.Base;
 using AutoTf.FahrplanParser.Extensions;
 using Emgu.CV;
 using Emgu.CV.OCR;

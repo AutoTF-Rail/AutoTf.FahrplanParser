@@ -7,7 +7,7 @@ namespace AutoTf.FahrplanParser.Content.Signals;
 /// </summary>
 public class BlockSignal : SignalContent
 {
-	public BlockSignal(string stationName, string speed)
+	private BlockSignal(string stationName, string speed)
 	{
 		StationName = stationName;
 		Speed = speed;

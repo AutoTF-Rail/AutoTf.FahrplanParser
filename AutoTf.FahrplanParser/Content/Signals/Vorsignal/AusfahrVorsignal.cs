@@ -7,7 +7,7 @@ namespace AutoTf.FahrplanParser.Content.Signals.Vorsignal;
 /// </summary>
 public class AusfahrVorsignal : SignalContent
 {
-	public AusfahrVorsignal(string signalNummer)
+	private AusfahrVorsignal(string signalNummer)
 	{
 		SignalNummer = signalNummer;
 	}
@@ -23,7 +23,7 @@ public class AusfahrVorsignal : SignalContent
 	{
 		content = null;
 		
-		if (!TryParse(additionalText, "Avsig", "U", out string speed, out string signalNummer))
+		if (!TryParse(additionalText, "Avsig", "U", out string _, out string signalNummer))
 			return false;
 
 		content = new AusfahrVorsignal(signalNummer);

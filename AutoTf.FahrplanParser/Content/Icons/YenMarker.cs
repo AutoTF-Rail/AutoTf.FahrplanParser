@@ -1,18 +1,19 @@
 using AutoTf.FahrplanParser.Content.Base;
 using Emgu.CV;
 
-namespace AutoTf.FahrplanParser.Content;
+namespace AutoTf.FahrplanParser.Content.Icons;
 
+// TODO: Rename? To: "Weichenbereich ende"? or so?
 /// <summary>
-/// Sideways T (Icons/StumpfgleisIcon.png)
+/// ¥
 /// </summary>
-public class Stumpfgleis : IconContent
+public class YenMarker : IconContent
 {
-	private const string FileName = "Icons/StumpfgleisIcon.png";
+	private const string FileName = "Icons/YenIcon.png";
 	
 	public override string GetPrint()
 	{
-		return "Stumpfgleis";
+		return "\u00a5";
 	}
 	
 	public static bool TryParseIcon(Mat area)

@@ -5,10 +5,9 @@ namespace AutoTf.FahrplanParser.Content.Signals;
 /// <summary>
 /// Esig
 /// </summary>
-// TODO: Make like a attribute instead showing the meaning in a fahrplan?
 public class EinfahrSignal : SignalContent
 {
-	public EinfahrSignal(string stationName, string speed = "40")
+	private EinfahrSignal(string stationName, string speed = "40")
 	{
 		Speed = speed;
 		StationName = stationName;

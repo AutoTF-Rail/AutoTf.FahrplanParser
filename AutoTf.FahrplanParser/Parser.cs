@@ -1,8 +1,6 @@
 using System.Drawing;
-using AutoTf.FahrplanParser.Content;
 using AutoTf.FahrplanParser.Extensions;
 using Emgu.CV;
-using Emgu.CV.CvEnum;
 using Emgu.CV.OCR;
 
 namespace AutoTf.FahrplanParser;
@@ -10,6 +8,8 @@ namespace AutoTf.FahrplanParser;
 public class Parser : ParserBase
 {
 	public Parser(Tesseract engine) : base(engine) { }
+	
+	#region RegionMappings
 
 	public string Date(Mat mat) => ExtractTextClean(RegionMappings.Date, mat, Engine).Replace("\n", "");
 
@@ -30,6 +30,8 @@ public class Parser : ParserBase
 	public string Departure(Mat mat, Rectangle row) => ExtractTextClean(RegionMappings.Departure(row), mat, Engine).Replace("\n", "");
 
 	public string SpeedLimit(Mat mat, Rectangle row) => ExtractTextClean(RegionMappings.SpeedLimit(row), mat, Engine).Replace("\n", "");
+	
+	#endregion
 
 	public string? Location(Mat mat)
 	{
@@ -46,33 +48,5 @@ public class Parser : ParserBase
 		}
 
 		return null;
-	}
-
-	public bool TryParseIcon(Mat mat, Rectangle row, out RowContent? content)
-	{
-		content = null;
-		
-		try
-		{
-			Mat iconArea = GetIconArea(mat, row);
-
-			if (LzbStart.TryParseIcon(iconArea))
-				content = new LzbStart();
-			else if (LzbEnd.TryParseIcon(iconArea))
-				content = new LzbEnd();
-			else if (YenMarker.TryParseIcon(iconArea))
-				content = new YenMarker();
-			else if (Stumpfgleis.TryParseIcon(iconArea))
-				content = new Stumpfgleis();
-
-			iconArea.Dispose();
-
-			return content == null;
-		}
-		catch
-		{
-			// TODO: log?
-			return false;
-		}
 	}
 }

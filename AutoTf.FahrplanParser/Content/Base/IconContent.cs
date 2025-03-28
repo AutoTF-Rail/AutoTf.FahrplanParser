@@ -33,7 +33,7 @@ public abstract class IconContent : RowContent
 		Point maxLoc = Point.Empty;
 
 		CvInvoke.MinMaxLoc(result, ref minVal, ref maxVal, ref minLoc, ref maxLoc);
-		result.Dispose();;
+		result.Dispose();
 
 		double threshold = 0.8;
 		return maxVal >= threshold;

@@ -52,10 +52,6 @@
       </None>
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Content\Markers\" />
-    </ItemGroup>
-
     <PropertyGroup>
         <UseRidGraph>true</UseRidGraph>
     </PropertyGroup>

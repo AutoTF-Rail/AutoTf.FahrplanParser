@@ -7,7 +7,7 @@ namespace AutoTf.FahrplanParser.Content.Signals;
 /// </summary>
 public class AusfahrSignal : SignalContent
 {
-	public AusfahrSignal(string stationName, string speed = "40")
+	private AusfahrSignal(string stationName, string speed = "40")
 	{
 		StationName = stationName;
 		Speed = speed;
