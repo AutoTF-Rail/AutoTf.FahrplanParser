@@ -76,7 +76,7 @@ public abstract class ParserBase
 			if (Station.TryParse(additionalText, arrival, departure, out content))
 				return true;
 			
-			if (NoStopStation.TryParse(additionalText, arrival, departure, out content))
+			if (NoStopStation.TryParse(additionalText, departure, out content))
 				return true;
 			
 			return false;

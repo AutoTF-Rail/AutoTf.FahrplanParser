@@ -10,6 +10,7 @@ namespace AutoTf.FahrplanParser;
 internal static class Program
 {
 	// TODO: "Prepare" the images by making the dark writings a bit more stronger to smooth out errors due to bad quality?
+	// TODO: Resizing the files to respective sizes to the ROI's? Or resize the ROI to the image?
 	public static Task Main(string[] args)
 	{
 		Console.WriteLine("AutoTF Fahrplan Parser");
