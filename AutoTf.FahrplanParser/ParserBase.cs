@@ -2,6 +2,7 @@ using System.Drawing;
 using System.Text.RegularExpressions;
 using AutoTf.FahrplanParser.Content;
 using AutoTf.FahrplanParser.Content.Signals;
+using AutoTf.FahrplanParser.Content.Signals.Vorsignal;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.OCR;
@@ -42,9 +43,13 @@ public abstract class ParserBase
 			return new NoStopStation(additionalText);
 		
 		// Other
-		if (additionalText.Contains("GSM-R"))
+		if (additionalText.Contains("ZF"))
 		{
-			return new GSMRInfo(additionalText.Trim());
+			additionalText = additionalText.Replace("ZF", "").Replace("-", "").Trim();
+			if (additionalText.Contains("ENDE"))
+				return new ZugFunkEnde();
+			
+			return new ZugFunk(additionalText);
 		}
 
 		// TODO: Continue cases

@@ -1,8 +1,8 @@
 namespace AutoTf.FahrplanParser.Content;
 
-public class GSMRInfo : RowContent
+public class ZugFunk : RowContent
 {
-	public GSMRInfo(string info)
+	public ZugFunk(string info)
 	{
 		Info = info;
 	}
@@ -11,6 +11,6 @@ public class GSMRInfo : RowContent
 	
 	public override string GetPrint()
 	{
-		return $"GSM-R Info: {Info}";
+		return $"- ZF {Info} -";
 	}
 }
