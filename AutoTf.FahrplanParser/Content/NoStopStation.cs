@@ -23,7 +23,7 @@ public class NoStopStation : RowContent
 		content = null;
 		
 		// TODO: Gibt es stationen die notiert sind, aber auch keine abfahrts zeit haben?
-		if (string.IsNullOrWhiteSpace(additionalText) || string.IsNullOrWhiteSpace(departure) && !string.IsNullOrWhiteSpace(arrival))
+		if (!string.IsNullOrEmpty(arrival.Trim()) || string.IsNullOrEmpty(departure))
 			return false;
 
 		content = new NoStopStation(additionalText);
