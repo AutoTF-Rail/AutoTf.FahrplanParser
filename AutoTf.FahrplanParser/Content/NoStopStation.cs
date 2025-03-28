@@ -18,12 +18,12 @@ public class NoStopStation : RowContent
 		return $"{Name} - No stop";
 	}
 
-	public static bool TryParse(string additionalText, string departure, out RowContent? content)
+	public static bool TryParse(string additionalText, string arrival, string departure, out RowContent? content)
 	{
 		content = null;
 		
 		// TODO: Gibt es stationen die notiert sind, aber auch keine abfahrts zeit haben?
-		if (string.IsNullOrWhiteSpace(additionalText) || string.IsNullOrWhiteSpace(departure))
+		if (string.IsNullOrWhiteSpace(additionalText) || string.IsNullOrWhiteSpace(departure) && !string.IsNullOrWhiteSpace(arrival))
 			return false;
 
 		content = new NoStopStation(additionalText);
