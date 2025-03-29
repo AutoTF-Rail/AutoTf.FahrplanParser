@@ -81,7 +81,7 @@ internal static class Program
 
 	private static void ProcessFileAsync(string file, int fileIndex, ref List<KeyValuePair<string, RowContent>> rows, ref List<KeyValuePair<string, string>> speedChanges)
 	{
-		using Tesseract engine = new Tesseract(Path.Combine(AppContext.BaseDirectory, "tessdata"), "deu", OcrEngineMode.Default);
+		using Tesseract engine = new Tesseract(Path.Combine(AppContext.BaseDirectory, "tessdata"), "deu", OcrEngineMode.LstmOnly);
 		Parser parser = new Parser(engine);
 		
 		Mat mat = CvInvoke.Imread(file);
