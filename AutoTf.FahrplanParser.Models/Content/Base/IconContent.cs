@@ -8,7 +8,7 @@ public abstract class IconContent : RowContent
 {
 	internal static bool TryParseIcon(string filename, Mat area)
 	{
-		Mat icon = CvInvoke.Imread(filename, ImreadModes.Grayscale);
+		Mat icon = CvInvoke.Imread(Path.Combine(AppContext.BaseDirectory, filename), ImreadModes.Grayscale);
 		
 		bool result = SearchForIcon(area, icon);
 		
