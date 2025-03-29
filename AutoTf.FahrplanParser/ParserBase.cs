@@ -36,8 +36,8 @@ public abstract class ParserBase
 				content = new TunnelEnd();
 
 			tunnelArea.Dispose();
-			
-			return content == null;
+
+			return content != null;
 		}
 		catch
 		{
@@ -64,7 +64,7 @@ public abstract class ParserBase
 
 			iconArea.Dispose();
 
-			return content == null;
+			return content != null;
 		}
 		catch
 		{
