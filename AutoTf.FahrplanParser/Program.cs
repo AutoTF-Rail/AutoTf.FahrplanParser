@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using AutoTf.FahrplanParser.Content;
 using AutoTf.FahrplanParser.Content.Base;
+using AutoTf.FahrplanParser.Content.Icons;
 using AutoTf.FahrplanParser.Extensions;
 using Emgu.CV;
 using Emgu.CV.OCR;
@@ -170,12 +171,6 @@ internal static class Program
 					}
 				}
 
-				if (parser.TryParseTunnel(mat, row, out RowContent? tunnelContent))
-				{
-					// TODO: Different list?
-					rows.Add(new KeyValuePair<string, RowContent>(hektometer, tunnelContent!));
-				}
-
 				RowContent? content = null;
 				
 				if (string.IsNullOrWhiteSpace(additionalText))
@@ -185,7 +180,16 @@ internal static class Program
 				}
 				else
 				{
-					content = parser.ResolveContent(additionalText, arrivalTime, departureTime);
+					if (parser.TryParseTunnel(mat, row, additionalText, out RowContent? tunnelContent))
+					{
+						// TODO: Different list?
+						rows.Add(new KeyValuePair<string, RowContent>(hektometer, tunnelContent!));
+					}
+
+					if (tunnelContent is not TunnelStart)
+					{
+						content = parser.ResolveContent(additionalText, arrivalTime, departureTime);
+					}
 					
 					// No need for a null check, since the method does it
 					// if(!string.IsNullOrWhiteSpace(arrivalTime))

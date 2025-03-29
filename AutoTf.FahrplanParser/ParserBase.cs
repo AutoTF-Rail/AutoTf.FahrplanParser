@@ -20,7 +20,7 @@ public abstract class ParserBase
 		Engine = engine;
 	}
 
-	public bool TryParseTunnel(Mat mat, Rectangle row, out RowContent? content)
+	public bool TryParseTunnel(Mat mat, Rectangle row, string additionalText, out RowContent? content)
 	{
 		content = null;
 		
@@ -29,7 +29,7 @@ public abstract class ParserBase
 			Mat tunnelArea = GetTunnelArea(mat, row);
 			
 			if (TunnelStart.TryParseIcon(tunnelArea))
-				content = new TunnelStart();
+				content = new TunnelStart(additionalText);
 			else if (TunnelPart.TryParseIcon(tunnelArea))
 				content = new TunnelPart();
 			else if (TunnelEnd.TryParseIcon(tunnelArea))
