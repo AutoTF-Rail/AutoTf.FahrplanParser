@@ -15,7 +15,7 @@ internal static class Program
 	public static Task Main(string[] args)
 	{
 		Console.WriteLine("AutoTF Fahrplan Parser");
-		Console.WriteLine($"Started at {DateTime.Now.ToString("mm:ss.fff")}");
+		DateTime start = DateTime.Now;
 		
 		// We can't just go by hektometer keys, because hektometers might repeat
 		List<KeyValuePair<string, string>> speedChanges = new List<KeyValuePair<string, string>>();
@@ -26,6 +26,8 @@ internal static class Program
 		ProcessFolder("ExampleTwo", ref rows, ref speedChanges);
 		
 		PrintResults(speedChanges, rows);
+		
+		Console.WriteLine($"Finished at {(DateTime.Now - start).TotalSeconds}");
 
 		return Task.CompletedTask;
 	}
@@ -40,8 +42,6 @@ internal static class Program
 		{
 			ProcessFileAsync(file, fileIndex++, ref rows, ref speedChanges);
 		}
-		
-		Console.WriteLine($"Finished at {DateTime.Now:mm:ss.fff}");
 	}
 
 	private static void PrintResults(List<KeyValuePair<string, string>> speedChanges, List<KeyValuePair<string, RowContent>> rows)
