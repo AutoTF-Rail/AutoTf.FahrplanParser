@@ -33,7 +33,7 @@ internal static class Program
 	private static void ProcessFolder(string folderName, List<KeyValuePair<string, RowContent>> rows, List<KeyValuePair<string, string>> speedChanges)
 	{
 		int fileIndex = 0;
-		List<string> files = Directory.GetFiles("FahrplanData/" + folderName).ToList();
+		List<string> files = Directory.GetFiles(Path.Combine(AppContext.BaseDirectory, "FahrplanData", folderName)).ToList();
 		files.Sort();
 		
 		foreach (string file in files)
