@@ -59,37 +59,37 @@
       <None Update="Icons\TunnelStartIcon.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="FahrplanData\ExampleTwo\Fahrplan2Part1.png">
+      <None Update="FahrplanData\ExampleTwo\Fahrplan2PartA.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="FahrplanData\ExampleTwo\Fahrplan2Part2.png">
+      <None Update="FahrplanData\ExampleTwo\Fahrplan2PartB.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="FahrplanData\ExampleTwo\Fahrplan2Part3.png">
+      <None Update="FahrplanData\ExampleTwo\Fahrplan2PartC.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="FahrplanData\ExampleTwo\Fahrplan2Part4.png">
+      <None Update="FahrplanData\ExampleTwo\Fahrplan2PartD.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="FahrplanData\ExampleTwo\Fahrplan2Part5.png">
+      <None Update="FahrplanData\ExampleTwo\Fahrplan2PartF.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="FahrplanData\ExampleTwo\Fahrplan2Part6.png">
+      <None Update="FahrplanData\ExampleTwo\Fahrplan2PartG.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="FahrplanData\ExampleTwo\Fahrplan2Part7.png">
+      <None Update="FahrplanData\ExampleTwo\Fahrplan2PartH.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="FahrplanData\ExampleTwo\Fahrplan2Part8.png">
+      <None Update="FahrplanData\ExampleTwo\Fahrplan2PartI.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="FahrplanData\ExampleTwo\Fahrplan2Part9.png">
+      <None Update="FahrplanData\ExampleTwo\Fahrplan2PartJ.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="FahrplanData\ExampleTwo\Fahrplan2Part10.png">
+      <None Update="FahrplanData\ExampleTwo\Fahrplan2PartK.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="FahrplanData\ExampleTwo\Fahrplan2Part11.png">
+      <None Update="FahrplanData\ExampleTwo\Fahrplan2PartL.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>
