@@ -1,13 +1,7 @@
 using System.Drawing;
 using AutoTf.FahrplanParser.Content.Content;
 using AutoTf.FahrplanParser.Content.Content.Base;
-using AutoTf.FahrplanParser.Content.Content.Icons;
-using AutoTf.FahrplanParser.Content.Content.Icons.Tunnels;
-using AutoTf.FahrplanParser.Content.Content.Markers;
-using AutoTf.FahrplanParser.Content.Content.Signals;
-using AutoTf.FahrplanParser.Content.Content.Signals.Vorsignal;
 using Emgu.CV;
-using Emgu.CV.CvEnum;
 using Emgu.CV.OCR;
 
 namespace AutoTf.FahrplanParser;
@@ -21,187 +15,29 @@ public abstract class ParserBase
 		Engine = engine;
 	}
 
-	public bool TryParseTunnel(Mat mat, Rectangle row, string additionalText, out RowContent? content)
+	protected bool TryParseTunnel(Mat mat, Rectangle row, string additionalText, out RowContent? content) =>
+		ContentResolver.TryParseTunnel(mat, row, additionalText, out content);
+
+	protected bool TryParseIcon(Mat mat, Rectangle row, out RowContent? content) =>
+		ContentResolver.TryParseIcon(mat, row, out content);
+
+	protected RowContent? ResolveContent(string additionalText, string arrivalTime, string departureTime)
 	{
-		content = null;
-		
-		try
-		{
-			Mat tunnelArea = GetTunnelArea(mat, row);
-			
-			if (TunnelStart.TryParseIcon(tunnelArea))
-				content = new TunnelStart(additionalText);
-			else if (TunnelPart.TryParseIcon(tunnelArea))
-				content = new TunnelPart();
-			else if (TunnelEnd.TryParseIcon(tunnelArea))
-				content = new TunnelEnd();
-
-			tunnelArea.Dispose();
-
-			return content != null;
-		}
-		catch
-		{
-			return false;
-		}
-	}
-
-	public bool TryParseIcon(Mat mat, Rectangle row, out RowContent? content)
-	{
-		content = null;
-		
-		try
-		{
-			Mat iconArea = GetIconArea(mat, row);
-
-			if (LzbStart.TryParseIcon(iconArea))
-				content = new LzbStart();
-			else if (LzbEnd.TryParseIcon(iconArea))
-				content = new LzbEnd();
-			else if (YenMarker.TryParseIcon(iconArea))
-				content = new YenMarker();
-			else if (Stumpfgleis.TryParseIcon(iconArea))
-				content = new Stumpfgleis();
-
-			iconArea.Dispose();
-
-			return content != null;
-		}
-		catch
-		{
-			// TODO: log?
-			return false;
-		}
-	}
-
-	public RowContent? ResolveContent(string additionalText, string arrivalTime, string departureTime)
-	{
-		// Next row says "*1) Kopf machen" but the *1) here doesn't matter afaik
+		// Next row says "*1) Kopf machen" but the *1) here doesn't matter afaik // TODO: Check the *1) things etc.
 		if (arrivalTime.Contains("*1)"))
 			return null;
 		
-		if (TryParseSignal(additionalText, out RowContent? signalContent))
+		if (ContentResolver.TryParseSignal(additionalText, out RowContent? signalContent))
 			return signalContent!;
 		
-		if (TryParseMarker(additionalText, out RowContent? markerContent))
+		if (ContentResolver.TryParseMarker(additionalText, out RowContent? markerContent))
 			return markerContent!;
 		
 		// Important to do this AFTER the markers, because Abzw and others could have a departure time too
-		if (TryParseStation(additionalText, arrivalTime, departureTime, out RowContent? stationContent))
+		if (ContentResolver.TryParseStation(additionalText, arrivalTime, departureTime, out RowContent? stationContent))
 			return stationContent!;
 		
 		return new UnknownContent(additionalText);
-	}
-
-	private bool TryParseStation(string additionalText, string arrival, string departure, out RowContent? content)
-	{
-		content = null;
-		
-		try
-		{
-			if (Station.TryParse(additionalText, arrival, departure, out content))
-				return true;
-			
-			if (NoStopStation.TryParse(additionalText, arrival, departure, out content))
-				return true;
-			
-			return false;
-		}
-		catch
-		{
-			return false;
-		}
-	}
-
-	private bool TryParseSignal(string additionalText, out RowContent? content)
-	{
-		if (AusfahrVorsignal.TryParse(additionalText, out content))
-			return true;
-		
-		if (BlockVorsignal.TryParse(additionalText, out content))
-			return true;
-		
-		if (AusfahrSignal.TryParse(additionalText, out content))
-			return true;
-		
-		if (BlockSignal.TryParse(additionalText, out content))
-			return true;
-		
-		if (EinfahrSignal.TryParse(additionalText, out content))
-			return true;
-		
-		if (SelbstBlockSignal.TryParse(additionalText, out content))
-			return true;
-		
-		if (ZwischenSignal.TryParse(additionalText, out content))
-			return true;
-
-		return false;
-	}
-	
-	private bool TryParseMarker(string additionalText, out RowContent? content)
-	{
-		content = null;
-
-		try
-		{
-			if (Abzweigung.TryParse(additionalText, out content))
-				return true;
-			
-			if (Anschlussstelle.TryParse(additionalText, out content))
-				return true;
-			
-			if (Ausweichanschlussstelle.TryParse(additionalText, out content))
-				return true;
-			
-			if (Bahnuebergang.TryParse(additionalText, out content))
-				return true;
-			
-			if (SwitchSide.TryParse(additionalText, out content))
-				return true;
-			
-			if (Ueberholbahnhof.TryParse(additionalText, out content))
-				return true;
-			
-			if (Ueberleitstelle.TryParse(additionalText, out content))
-				return true;
-			
-			if (ZugFunk.TryParse(additionalText, out content))
-				return true;
-			
-			if (LzbBlock.TryParse(additionalText, out content))
-				return true;
-
-			return false;
-		}
-		catch
-		{
-			return false;
-		}
-	}
-
-	private Mat GetIconArea(Mat mat, Rectangle row)
-	{
-		Rectangle roi = new Rectangle(row.X + 386, row.Y, 60, 44);
-		Mat area = new Mat(mat, roi);
-		CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
-
-		if (area.NumberOfChannels != 1)
-			CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
-
-		return area;
-	}
-
-	private Mat GetTunnelArea(Mat mat, Rectangle row)
-	{
-		Rectangle roi = new Rectangle(row.X + 348, row.Y, 35, 44);
-		Mat area = new Mat(mat, roi);
-		CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
-
-		if (area.NumberOfChannels != 1)
-			CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
-
-		return area;
 	}
 
 	protected static string ExtractTextClean(Rectangle roi, Mat mat, Tesseract engine) => ExtractText(roi, mat, engine).Replace("\n", "");

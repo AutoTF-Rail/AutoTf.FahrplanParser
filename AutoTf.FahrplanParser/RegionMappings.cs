@@ -2,10 +2,10 @@ using System.Drawing;
 
 namespace AutoTf.FahrplanParser;
 
-public static class RegionMappings
+internal static class RegionMappings
 {
-	public static readonly List<Rectangle> Rows = new List<Rectangle>()
-	{
+	public static readonly List<Rectangle> Rows =
+	[
 		new Rectangle(85, 109, 1165, 44),
 		new Rectangle(85, 155, 1165, 44),
 		new Rectangle(85, 201, 1165, 44),
@@ -20,11 +20,11 @@ public static class RegionMappings
 		new Rectangle(85, 614, 1165, 44),
 		new Rectangle(85, 659, 1165, 44),
 		new Rectangle(85, 705, 1165, 44),
-		new Rectangle(85, 750, 1165, 44),
-	};
+		new Rectangle(85, 750, 1165, 44)
+	];
 	
-	public static readonly List<Rectangle> LocationPoints = new List<Rectangle>()
-	{
+	public static readonly List<Rectangle> LocationPoints =
+	[
 		new Rectangle(190, 432, 37, 43),
 		new Rectangle(190, 477, 37, 43),
 		new Rectangle(190, 523, 37, 43),
@@ -32,10 +32,10 @@ public static class RegionMappings
 		new Rectangle(190, 614, 37, 43),
 		new Rectangle(190, 659, 37, 43),
 		new Rectangle(190, 705, 37, 43)
-	};
+	];
 					
-	public static readonly List<Rectangle> LocationPointsHektometer = new List<Rectangle>()
-	{
+	public static readonly List<Rectangle> LocationPointsHektometer =
+	[
 		new Rectangle(259, 432, 127, 43),
 		new Rectangle(259, 477, 127, 43),
 		new Rectangle(259, 523, 127, 43),
@@ -43,7 +43,7 @@ public static class RegionMappings
 		new Rectangle(259, 614, 127, 43),
 		new Rectangle(259, 659, 127, 43),
 		new Rectangle(259, 705, 127, 43)
-	};
+	];
 	
 	public static readonly Rectangle PlanValidity = new Rectangle(348, 11, 259, 44);
 	public static readonly Rectangle TrainNumber = new Rectangle(17, 11, 134, 44);

@@ -22,15 +22,15 @@ internal static class Program
 
 		List<KeyValuePair<string, RowContent>> rows = new List<KeyValuePair<string, RowContent>>();
 
-		ProcessFolder("ExampleOne", rows, speedChanges);
-		ProcessFolder("ExampleTwo", rows, speedChanges);
+		ProcessFolder("ExampleOne", ref  rows, ref speedChanges);
+		ProcessFolder("ExampleTwo", ref rows, ref speedChanges);
 		
 		PrintResults(speedChanges, rows);
 
 		return Task.CompletedTask;
 	}
 
-	private static void ProcessFolder(string folderName, List<KeyValuePair<string, RowContent>> rows, List<KeyValuePair<string, string>> speedChanges)
+	private static void ProcessFolder(string folderName, ref List<KeyValuePair<string, RowContent>> rows, ref List<KeyValuePair<string, string>> speedChanges)
 	{
 		int fileIndex = 0;
 		List<string> files = Directory.GetFiles(Path.Combine(AppContext.BaseDirectory, "FahrplanData", folderName)).ToList();
@@ -38,10 +38,10 @@ internal static class Program
 		
 		foreach (string file in files)
 		{
-			ProcessFileAsync(file, fileIndex++, rows, speedChanges);
+			ProcessFileAsync(file, fileIndex++, ref rows, ref speedChanges);
 		}
 		
-		Console.WriteLine($"Finished at {DateTime.Now.ToString("mm:ss.fff")}");
+		Console.WriteLine($"Finished at {DateTime.Now:mm:ss.fff}");
 	}
 
 	private static void PrintResults(List<KeyValuePair<string, string>> speedChanges, List<KeyValuePair<string, RowContent>> rows)
@@ -79,7 +79,7 @@ internal static class Program
 		}
 	}
 
-	private static void ProcessFileAsync(string file, int fileIndex, List<KeyValuePair<string, RowContent>> rows, List<KeyValuePair<string, string>> speedChanges)
+	private static void ProcessFileAsync(string file, int fileIndex, ref List<KeyValuePair<string, RowContent>> rows, ref List<KeyValuePair<string, string>> speedChanges)
 	{
 		using Tesseract engine = new Tesseract(Path.Combine(AppContext.BaseDirectory, "tessdata"), "deu", OcrEngineMode.Default);
 		Parser parser = new Parser(engine);
@@ -99,122 +99,9 @@ internal static class Program
 			else 
 				Console.WriteLine($"Estimated location: {location}.\n\n");
 		}
-
-		List<Rectangle> rowsRoi = [..RegionMappings.Rows];
-		rowsRoi.Reverse();
-
-		List<RowContent> additionalContent = new List<RowContent>();
 		
-		string additionalSpeed = string.Empty;
-
-		for (int i = 0; i < rowsRoi.Count; i++)
-		{
-			Rectangle row = rowsRoi[i];
-
-			string hektometer = parser.Hektometer(mat, row);
-			string additionalText = parser.AdditionalText(mat, row);
-			string arrivalTime = parser.Arrival(mat, row);
-			string departureTime = parser.Departure(mat, row);
-			
-			// If we don't have a hektometer, we will add it's info to the next one
-			if (string.IsNullOrWhiteSpace(hektometer))
-			{
-				// TODO: Does this case ever happen? Having a speed limit change at a unknown hektometer? If not, this can be removed
-				string speedlimit = parser.SpeedLimit(mat, row);
-				
-				if (!string.IsNullOrWhiteSpace(speedlimit))
-				{
-					if (!mat.ContainsYellow(RegionMappings.YellowArea(row)))
-						additionalSpeed = speedlimit;
-				}
-
-				RowContent? content = parser.ResolveContent(additionalText, arrivalTime, departureTime);
-				
-				if(content == null)
-					continue;
-				
-				content = parser.CheckForDuplicateContent(content, hektometer, rows);
-				
-				additionalContent.Add(content!);
-			}
-			else
-			{
-				rows.AddRange(additionalContent.Select(x => new KeyValuePair<string, RowContent>(hektometer, x)));
-				additionalContent.Clear();
-				
-				string speedLimit;
-
-				// TODO: We could remove this, if we know the answer to the TODO above
-				if (additionalSpeed != string.Empty)
-				{
-					speedLimit = additionalSpeed;
-					additionalSpeed = string.Empty;
-				}
-				else
-				{
-					speedLimit = parser.SpeedLimit(mat, row);
-				}
-					
-				if (!string.IsNullOrWhiteSpace(speedLimit))
-				{
-					// Skip if yellow (repeating)
-					if (!mat.ContainsYellow(RegionMappings.YellowArea(row)))
-					{
-						// Skip if already contained
-						if (speedChanges.Any())
-						{
-							if(speedChanges.TakeLast(3).All(x => x.Key != hektometer))
-								speedChanges.Add(new KeyValuePair<string, string>(hektometer, speedLimit));
-						}
-						else
-							speedChanges.Add(new KeyValuePair<string, string>(hektometer, speedLimit));
-					}
-				}
-
-				RowContent? content = null;
-				
-				// We need to save this, because tunnelContent could return to being null, if it's duplicate, but in the check after the tunnel parsing, we need to know if we had a tunnel. (And which type)
-				TunnelType tunnelType = TunnelType.None;
-				
-				if (parser.TryParseTunnel(mat, row, additionalText, out RowContent? tunnelContent))
-				{
-					if(tunnelContent is TunnelContent tunnel)
-						tunnelType = tunnel.GetTunnelType();
-					
-					// TODO: Different list?
-					tunnelContent = parser.CheckForDuplicateContent(tunnelContent!, hektometer, rows);
-					
-					if (tunnelContent != null)
-						rows.Add(new KeyValuePair<string, RowContent>(hektometer, tunnelContent));
-				}
-
-				if (tunnelType != TunnelType.End)
-				{
-					if (string.IsNullOrWhiteSpace(additionalText))
-					{
-						if (parser.TryParseIcon(mat, row, out RowContent? result))
-							content = result;
-					}
-					else
-					{
-						if (tunnelType != TunnelType.Start)
-							content = parser.ResolveContent(additionalText, arrivalTime, departureTime);
-						
-						// No need for a null check, since the method does it
-						// if(!string.IsNullOrWhiteSpace(arrivalTime))
-						// 	content = parser.CheckForDuplicateStation(content, arrivalTime, additionalText, rows);
-					}
-					
-				}
-				if(content != null)
-					content = parser.CheckForDuplicateContent(content, hektometer, rows);
-
-				if (content == null)
-					continue;
-
-				rows.Add(new KeyValuePair<string, RowContent>(hektometer, content));
-			}
-		}
+		parser.ReadPage(parser, mat, ref rows, ref speedChanges);
+		
 		mat.Dispose();
 	}
 }
