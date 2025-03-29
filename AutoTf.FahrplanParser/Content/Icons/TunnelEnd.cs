@@ -3,6 +3,9 @@ using Emgu.CV;
 
 namespace AutoTf.FahrplanParser.Content.Icons;
 
+/// <summary>
+/// TODO: Always empty addtionaltext?
+/// </summary>
 public class TunnelEnd : IconContent
 {
 	private const string FileName = "Icons/TunnelEndIcon.png";
