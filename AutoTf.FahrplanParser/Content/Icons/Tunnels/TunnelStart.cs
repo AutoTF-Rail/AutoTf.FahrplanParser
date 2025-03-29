@@ -1,12 +1,12 @@
 using AutoTf.FahrplanParser.Content.Base;
 using Emgu.CV;
 
-namespace AutoTf.FahrplanParser.Content.Icons;
+namespace AutoTf.FahrplanParser.Content.Icons.Tunnels;
 
 /// <summary>
 /// Icons/tunnelStartIcon.png
 /// </summary>
-public class TunnelStart : IconContent
+public class TunnelStart : TunnelContent
 {
 	private const string FileName = "Icons/TunnelStartIcon.png";
 
@@ -21,7 +21,12 @@ public class TunnelStart : IconContent
 	{
 		return $"Tunnel {Name}-T";
 	}
-	
+
+	public override TunnelType GetTunnelType()
+	{
+		return TunnelType.Start;
+	}
+
 	public static bool TryParseIcon(Mat area)
 	{
 		return TryParseIcon(FileName, area);

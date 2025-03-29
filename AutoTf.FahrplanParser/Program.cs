@@ -2,6 +2,7 @@
 using AutoTf.FahrplanParser.Content;
 using AutoTf.FahrplanParser.Content.Base;
 using AutoTf.FahrplanParser.Content.Icons;
+using AutoTf.FahrplanParser.Content.Icons.Tunnels;
 using AutoTf.FahrplanParser.Extensions;
 using Emgu.CV;
 using Emgu.CV.OCR;
@@ -173,8 +174,14 @@ internal static class Program
 
 				RowContent? content = null;
 				
+				// We need to save this, because tunnelContent could return to being null, if it's duplicate, but in the check after the tunnel parsing, we need to know if we had a tunnel. (And which type)
+				TunnelType tunnelType = TunnelType.None;
+				
 				if (parser.TryParseTunnel(mat, row, additionalText, out RowContent? tunnelContent))
 				{
+					if(tunnelContent is TunnelContent tunnel)
+						tunnelType = tunnel.GetTunnelType();
+					
 					// TODO: Different list?
 					tunnelContent = parser.CheckForDuplicateContent(tunnelContent!, hektometer, rows);
 					
@@ -182,7 +189,7 @@ internal static class Program
 						rows.Add(new KeyValuePair<string, RowContent>(hektometer, tunnelContent!));
 				}
 
-				if (tunnelContent is not TunnelEnd)
+				if (tunnelType != TunnelType.End)
 				{
 					if (string.IsNullOrWhiteSpace(additionalText))
 					{
@@ -191,7 +198,7 @@ internal static class Program
 					}
 					else
 					{
-						if (tunnelContent is not TunnelStart)
+						if (tunnelType != TunnelType.Start)
 							content = parser.ResolveContent(additionalText, arrivalTime, departureTime);
 						
 						// No need for a null check, since the method does it
