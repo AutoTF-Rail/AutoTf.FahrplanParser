@@ -176,7 +176,10 @@ internal static class Program
 				if (parser.TryParseTunnel(mat, row, additionalText, out RowContent? tunnelContent))
 				{
 					// TODO: Different list?
-					rows.Add(new KeyValuePair<string, RowContent>(hektometer, tunnelContent!));
+					tunnelContent = parser.CheckForDuplicateContent(tunnelContent!, hektometer, rows);
+					
+					if (tunnelContent != null)
+						rows.Add(new KeyValuePair<string, RowContent>(hektometer, tunnelContent!));
 				}
 
 				if (tunnelContent is not TunnelEnd)
