@@ -173,27 +173,29 @@ internal static class Program
 
 				RowContent? content = null;
 				
-				if (string.IsNullOrWhiteSpace(additionalText))
+				if (parser.TryParseTunnel(mat, row, additionalText, out RowContent? tunnelContent))
 				{
-					if (parser.TryParseIcon(mat, row, out RowContent? result))
-						content = result;
+					// TODO: Different list?
+					rows.Add(new KeyValuePair<string, RowContent>(hektometer, tunnelContent!));
 				}
-				else
-				{
-					if (parser.TryParseTunnel(mat, row, additionalText, out RowContent? tunnelContent))
-					{
-						// TODO: Different list?
-						rows.Add(new KeyValuePair<string, RowContent>(hektometer, tunnelContent!));
-					}
 
-					if (tunnelContent is not TunnelStart)
+				if (tunnelContent is not TunnelEnd)
+				{
+					if (string.IsNullOrWhiteSpace(additionalText))
 					{
-						content = parser.ResolveContent(additionalText, arrivalTime, departureTime);
+						if (parser.TryParseIcon(mat, row, out RowContent? result))
+							content = result;
+					}
+					else
+					{
+						if (tunnelContent is not TunnelStart)
+							content = parser.ResolveContent(additionalText, arrivalTime, departureTime);
+						
+						// No need for a null check, since the method does it
+						// if(!string.IsNullOrWhiteSpace(arrivalTime))
+						// 	content = parser.CheckForDuplicateStation(content, arrivalTime, additionalText, rows);
 					}
 					
-					// No need for a null check, since the method does it
-					// if(!string.IsNullOrWhiteSpace(arrivalTime))
-					// 	content = parser.CheckForDuplicateStation(content, arrivalTime, additionalText, rows);
 				}
 				if(content != null)
 					content = parser.CheckForDuplicateContent(content, hektometer, rows);
