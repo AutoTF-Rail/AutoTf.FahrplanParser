@@ -21,8 +21,18 @@ internal static class Program
 
 		List<KeyValuePair<string, RowContent>> rows = new List<KeyValuePair<string, RowContent>>();
 
+		ProcessFolder("ExampleOne", rows, speedChanges);
+		ProcessFolder("ExampleTwo", rows, speedChanges);
+		
+		PrintResults(speedChanges, rows);
+
+		return Task.CompletedTask;
+	}
+
+	private static void ProcessFolder(string folderName, List<KeyValuePair<string, RowContent>> rows, List<KeyValuePair<string, string>> speedChanges)
+	{
 		int fileIndex = 0;
-		List<string> files = Directory.GetFiles("FahrplanData/ExampleOne").ToList();
+		List<string> files = Directory.GetFiles("FahrplanData/" + folderName).ToList();
 		files.Sort();
 		
 		foreach (string file in files)
@@ -31,7 +41,10 @@ internal static class Program
 		}
 		
 		Console.WriteLine($"Finished at {DateTime.Now.ToString("mm:ss.fff")}");
-		
+	}
+
+	private static void PrintResults(List<KeyValuePair<string, string>> speedChanges, List<KeyValuePair<string, RowContent>> rows)
+	{
 		Console.WriteLine(Environment.NewLine + Environment.NewLine);
 
 		foreach (KeyValuePair<string,string> speedChange in speedChanges)
@@ -63,8 +76,6 @@ internal static class Program
 			
 			Console.WriteLine($"[{row.Key}] {content}");
 		}
-
-		return Task.CompletedTask;
 	}
 
 	private static void ProcessFileAsync(string file, int fileIndex, List<KeyValuePair<string, RowContent>> rows, List<KeyValuePair<string, string>> speedChanges)
