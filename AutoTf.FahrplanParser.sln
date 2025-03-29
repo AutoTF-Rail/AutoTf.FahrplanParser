@@ -2,6 +2,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoTf.FahrplanParser", "AutoTf.FahrplanParser\AutoTf.FahrplanParser.csproj", "{A24A2683-0F47-46F6-ABC9-F48C34804ED7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoTf.FahrplanParser.Models", "AutoTf.FahrplanParser.Models\AutoTf.FahrplanParser.Models.csproj", "{C737809B-704A-4D80-8A53-58ABE44FDEEA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoTf.FahrplanParser.Demo", "AutoTf.FahrplanParser.Demo\AutoTf.FahrplanParser.Demo.csproj", "{E5995413-98E0-4E75-A437-25C1BC1CF706}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +16,13 @@ Global
 		{A24A2683-0F47-46F6-ABC9-F48C34804ED7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A24A2683-0F47-46F6-ABC9-F48C34804ED7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A24A2683-0F47-46F6-ABC9-F48C34804ED7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C737809B-704A-4D80-8A53-58ABE44FDEEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C737809B-704A-4D80-8A53-58ABE44FDEEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C737809B-704A-4D80-8A53-58ABE44FDEEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C737809B-704A-4D80-8A53-58ABE44FDEEA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5995413-98E0-4E75-A437-25C1BC1CF706}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5995413-98E0-4E75-A437-25C1BC1CF706}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5995413-98E0-4E75-A437-25C1BC1CF706}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5995413-98E0-4E75-A437-25C1BC1CF706}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
