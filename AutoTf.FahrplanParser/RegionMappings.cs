@@ -68,7 +68,7 @@ public static class RegionMappings
 	
 	public static Rectangle AdditionalText(Rectangle row)
 	{
-		return new Rectangle(row.X + 451, row.Y, 375, 44);
+		return new Rectangle(row.X + 451, row.Y, 340, 44);
 	}
 	
 	public static Rectangle SpeedLimit(Rectangle row)
