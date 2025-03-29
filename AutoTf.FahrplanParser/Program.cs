@@ -159,6 +159,12 @@ internal static class Program
 					}
 				}
 
+				if (parser.TryParseTunnel(mat, row, out RowContent? tunnelContent))
+				{
+					// TODO: Different list?
+					rows.Add(new KeyValuePair<string, RowContent>(hektometer, tunnelContent!));
+				}
+
 				RowContent? content = null;
 				
 				if (string.IsNullOrWhiteSpace(additionalText))

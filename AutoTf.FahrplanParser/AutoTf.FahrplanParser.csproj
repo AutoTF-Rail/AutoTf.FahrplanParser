@@ -50,6 +50,12 @@
       <None Update="FahrplanData\ExampleOne\FahrplanPart8.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+      <None Update="Icons\TunnelEndIcon.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Icons\TunnelPartIcon.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
       <None Update="Icons\TunnelStartIcon.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>

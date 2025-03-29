@@ -20,6 +20,31 @@ public abstract class ParserBase
 		Engine = engine;
 	}
 
+	public bool TryParseTunnel(Mat mat, Rectangle row, out RowContent? content)
+	{
+		content = null;
+		
+		try
+		{
+			Mat tunnelArea = GetTunnelArea(mat, row);
+			
+			if (TunnelStart.TryParseIcon(tunnelArea))
+				content = new TunnelStart();
+			else if (TunnelPart.TryParseIcon(tunnelArea))
+				content = new TunnelPart();
+			else if (TunnelEnd.TryParseIcon(tunnelArea))
+				content = new TunnelEnd();
+
+			tunnelArea.Dispose();
+			
+			return content == null;
+		}
+		catch
+		{
+			return false;
+		}
+	}
+
 	public bool TryParseIcon(Mat mat, Rectangle row, out RowContent? content)
 	{
 		content = null;
@@ -142,6 +167,9 @@ public abstract class ParserBase
 			
 			if (ZugFunk.TryParse(additionalText, out content))
 				return true;
+			
+			if (LzbBlock.TryParse(additionalText, out content))
+				return true;
 
 			return false;
 		}
@@ -154,6 +182,18 @@ public abstract class ParserBase
 	private Mat GetIconArea(Mat mat, Rectangle row)
 	{
 		Rectangle roi = new Rectangle(row.X + 386, row.Y, 60, 44);
+		Mat area = new Mat(mat, roi);
+		CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
+
+		if (area.NumberOfChannels != 1)
+			CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
+
+		return area;
+	}
+
+	private Mat GetTunnelArea(Mat mat, Rectangle row)
+	{
+		Rectangle roi = new Rectangle(row.X + 348, row.Y, 35, 44);
 		Mat area = new Mat(mat, roi);
 		CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
 

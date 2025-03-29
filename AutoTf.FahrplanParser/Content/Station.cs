@@ -30,6 +30,7 @@ public class Station : RowContent
 		if (arrival.Trim() == "X")
 		{
 			// TODO: Handle this case?
+			// "Bedarfshalt"?
 		}
 
 		content = new Station(additionalText, arrival, departure);
