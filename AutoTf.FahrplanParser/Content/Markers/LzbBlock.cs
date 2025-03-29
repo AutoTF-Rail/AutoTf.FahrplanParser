@@ -23,10 +23,10 @@ public class LzbBlock : RowContent
 	{
 		content = null;
 
-		if (!additionalText.Contains("LZB-Bk"))
+		if (!additionalText.ToLower().Contains("lzb-bk"))
 			return false;
 
-		additionalText = additionalText.Replace("LZB-Bk", "").Trim();
+		additionalText = additionalText.ToLower().Replace("lzb-bk", "").Trim();
 
 		content = new LzbBlock(additionalText);
 		return true;
