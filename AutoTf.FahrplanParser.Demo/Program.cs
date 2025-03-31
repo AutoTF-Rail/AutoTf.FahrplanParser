@@ -28,7 +28,7 @@ internal static class Program
 		
 		PrintResults(speedChanges, rows);
 		
-		Console.WriteLine($"Finished at {(DateTime.Now - start).TotalSeconds}");
+		Console.WriteLine($"Time elapsesd: {(DateTime.Now - start).TotalSeconds}");
 
 		return Task.CompletedTask;
 	}
