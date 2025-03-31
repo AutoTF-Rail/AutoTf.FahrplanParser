@@ -22,8 +22,9 @@ internal static class Program
 
 		List<KeyValuePair<string, RowContent>> rows = new List<KeyValuePair<string, RowContent>>();
 
-		ProcessFolder("ExampleOne", ref  rows, ref speedChanges);
-		ProcessFolder("ExampleTwo", ref rows, ref speedChanges);
+		ProcessFolder("ExampleA", ref  rows, ref speedChanges);
+		ProcessFolder("ExampleB", ref rows, ref speedChanges);
+		ProcessFolder("ExampleC", ref rows, ref speedChanges);
 		
 		PrintResults(speedChanges, rows);
 		
