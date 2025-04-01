@@ -1,8 +1,5 @@
-﻿using System.Drawing;
-using AutoTf.FahrplanParser.Content;
-using AutoTf.FahrplanParser.Content.Content;
+﻿using AutoTf.FahrplanParser.Content.Content;
 using AutoTf.FahrplanParser.Content.Content.Base;
-using AutoTf.FahrplanParser.Extensions;
 using Emgu.CV;
 using Emgu.CV.OCR;
 
@@ -101,7 +98,7 @@ internal static class Program
 				Console.WriteLine($"Estimated location: {location}.\n\n");
 		}
 		
-		parser.ReadPage(parser, mat, ref rows, ref speedChanges);
+		parser.ReadPage(mat, ref rows, ref speedChanges);
 		
 		mat.Dispose();
 	}
