@@ -1,7 +1,9 @@
 # AutoTf.FahrplanParser
 Fahrplan Parser in image forms
 
-This repo is obsolete, its code has been moved to the CentralBridgeOS repo
+This repo is obsolete, its code has been moved to the [CentralBridgeOS repository](https://github.com/AutoTF-Rail/AutoTf.CentralBridgeOS)
+
+While this current version works, and could be packed into a package, it's not worth it, as it is only being used in the CentralBridge anyways :)
 
 
 ## Licenses
