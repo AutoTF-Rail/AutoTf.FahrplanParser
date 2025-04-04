@@ -11,7 +11,17 @@ public class Parser : InfoParser
 {
 	public Parser(Tesseract engine) : base(engine) { }
 
-	
+	public string Localise(Mat currentPage, ref List<KeyValuePair<string, RowContent>> rows, ref List<KeyValuePair<string, string>> speedChanges)
+	{
+		string? location = Location(currentPage);
+		
+		if (location == null)
+			Console.WriteLine("Could not find location point.");
+		else 
+			Console.WriteLine($"Estimated location: {location}.\n\n");
+		
+		return "";
+	}
 	
 	public void ReadPage(Mat mat, ref List<KeyValuePair<string, RowContent>> rows, ref List<KeyValuePair<string, string>> speedChanges)
 	{

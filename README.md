@@ -1,6 +1,7 @@
 # AutoTf.FahrplanParser
 Fahrplan Parser in image forms
 
+This repo is obsolete, its code has been moved to the CentralBridgeOS repo
 
 
 ## Licenses
