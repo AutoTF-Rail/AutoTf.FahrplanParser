@@ -8,13 +8,20 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <PackageReference Include="Emgu.CV" Version="4.10.0.5680" />
-        <PackageReference Include="Emgu.CV.runtime.debian-arm64" Version="4.10.0.5680" />
-    </ItemGroup>
-    
-    <ItemGroup>
       <ProjectReference Include="..\AutoTf.FahrplanParser.Models\AutoTf.FahrplanParser.Models.csproj" />
       <ProjectReference Include="..\AutoTf.FahrplanParser\AutoTf.FahrplanParser.csproj" />
+    </ItemGroup>
+
+    <Import Project="\home\emgucv\Emgu.CV.Runtime\Mac\Emgu.CV.Runtime.Mac.projitems" Label="Shared" />
+
+    <Import Project="\home\emgucv\Emgu.CV.Runtime\Debian\Emgu.CV.Runtime.Debian.projitems" Label="Shared" />
+
+    <Import Project="\home\emgucv\Emgu.CV.Runtime\Ubuntu\Emgu.CV.Runtime.Ubuntu.projitems" Label="Shared" />
+
+    <Import Project="\home\emgucv\Emgu.CV.Runtime\Windows\Emgu.CV.Runtime.Windows.projitems" Label="Shared" />
+    
+    <ItemGroup>
+        <ProjectReference Include="\home\emgucv\Emgu.CV\NetStandard\Emgu.CV.csproj" />
     </ItemGroup>
     
     <ItemGroup>
