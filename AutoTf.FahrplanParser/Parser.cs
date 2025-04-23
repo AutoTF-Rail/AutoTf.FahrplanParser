@@ -93,8 +93,8 @@ public class Parser : InfoParser
 				{
 					if (string.IsNullOrWhiteSpace(additionalText))
 					{
-						if (TryParseIcon(mat, row, out RowContent? result))
-							content = result;
+						// if (TryParseIcon(mat, row, out RowContent? result))
+						// 	content = result;
 					}
 					else
 					{
