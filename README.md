@@ -1,7 +1,7 @@
 # AutoTf.FahrplanParser
 
 This repo (specifically the Models project) is used as a SharedComponent in several projects including:
-* [AutoTf.CentralBridgeOS](https://github.com/AutoTF-Rail/AutoTf.CentralBridgeOS)
+* [AutoTf.CentralBridge](https://github.com/AutoTF-Rail/AutoTf.CentralBridge)
 * [AutoTf.Aic](https://github.com/AutoTF-Rail/AutoTf.Aic)
 
 There is also a demo that reads several example images and writes the read output to the console.
