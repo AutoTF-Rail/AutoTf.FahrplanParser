@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using AutoTf.FahrplanParser.Content.Content.Base;
 
 namespace AutoTf.FahrplanParser.Content.Content;
@@ -20,17 +21,25 @@ public class Station : RowContent
 		return $"{Name} Arrival: {Arrival} Departure: {Departure}";
 	}
 
-	public static bool TryParse(string additionalText, string arrival, string departure, out RowContent? content)
+	public static bool TryParse(string additionalText, string arrival, string departure, out IRowContent? content)
 	{
 		content = null;
 
 		if (string.IsNullOrWhiteSpace(arrival) || string.IsNullOrWhiteSpace(departure)) 
 			return false;
 		
-		if (arrival.Trim() == "X")
+		string timePattern = @"^\d{2}:\d{2}\.\d{1}$";
+		if (!Regex.IsMatch(arrival.Trim(), timePattern))
 		{
-			// TODO: Handle this case?
-			// "Bedarfshalt"?
+			// TODO: Handle?
+			// x = Bedarfshalt (Prob doesn't matter for us)
+			// Halt = Bü // TODO: This should probably be handled differently/We need to parse the Bü first, so it's not duplicated
+			// + = Betriebshalt
+			// H = Kein halt, solange Zp 9
+			// U = Kein halt
+			// N = nicht veröffentlichter halt (?)
+			// A = Only exit
+			// Z = Only entry
 		}
 
 		content = new Station(additionalText, arrival, departure);

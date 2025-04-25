@@ -1,10 +1,10 @@
 # AutoTf.FahrplanParser
-Fahrplan Parser in image forms
 
-This repo is obsolete, its code has been moved to the [CentralBridgeOS repository](https://github.com/AutoTF-Rail/AutoTf.CentralBridgeOS)
+This repo (specifically the Models project) is used as a SharedComponent in several projects including:
+* [AutoTf.CentralBridgeOS](https://github.com/AutoTF-Rail/AutoTf.CentralBridgeOS)
+* [AutoTf.Aic](https://github.com/AutoTF-Rail/AutoTf.Aic)
 
-While this current version works, and could be packed into a package, it's not worth it, as it is only being used in the CentralBridge anyways :)
-
+There is also a demo that reads several example images and writes the read output to the console.
 
 ## Licenses
 Example images are being grabbed from Zusi 3, and their publication has been granted by the respective copyright owners.

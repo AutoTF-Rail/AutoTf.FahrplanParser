@@ -4,15 +4,12 @@ namespace AutoTf.FahrplanParser.Content.Content.Markers;
 
 public class SwitchSide : RowContent
 {
-	// TODO: Is the number here at any time different? Maybe führerstand ID?
-	// TODO: This never has a hektometer, but we still need to assign it to one? 
-	
 	public override string GetPrint()
 	{
-		return "*1) Kopf machen";
+		return "Kopf machen";
 	}
 
-	public static bool TryParse(string additionalText, out RowContent? content)
+	public static bool TryParse(string additionalText, out IRowContent? content)
 	{
 		content = null;
 

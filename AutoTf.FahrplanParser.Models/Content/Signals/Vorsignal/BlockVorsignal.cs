@@ -20,7 +20,7 @@ public class BlockVorsignal : SignalContent
 		return $"Bkvsig {SignalNummer}";
 	}
 
-	public static bool TryParse(string additionalText, out RowContent? content)
+	public static bool TryParse(string additionalText, out IRowContent? content)
 	{
 		content = null;
 		

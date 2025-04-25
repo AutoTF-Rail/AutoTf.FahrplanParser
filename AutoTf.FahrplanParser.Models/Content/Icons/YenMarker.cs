@@ -3,9 +3,8 @@ using Emgu.CV;
 
 namespace AutoTf.FahrplanParser.Content.Content.Icons;
 
-// TODO: Rename? To: "Weichenbereich ende"? or so?
 /// <summary>
-/// ¥
+/// ¥ (Ende von Weichenbereich)
 /// </summary>
 public class YenMarker : IconContent
 {

@@ -26,7 +26,7 @@ public class BlockSignal : SignalContent
 		return $"Bksig{speed} {StationName}";
 	}
 
-	public static bool TryParse(string additionalText, out RowContent? content)
+	public static bool TryParse(string additionalText, out IRowContent? content)
 	{
 		content = null;
 		
