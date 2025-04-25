@@ -77,17 +77,17 @@ public class Parser : InfoParser
 				// We need to save this, because tunnelContent could return to being null, if it's duplicate, but in the check after the tunnel parsing, we need to know if we had a tunnel. (And which type)
 				TunnelType tunnelType = TunnelType.None;
 				
-				// if (TryParseTunnel(mat, row, additionalText, out RowContent? tunnelContent))
-				// {
-				// 	if(tunnelContent is TunnelContent tunnel)
-				// 		tunnelType = tunnel.GetTunnelType();
-				// 	
-				// 	// TODO: Different list?
-				// 	tunnelContent = CheckForDuplicateContent(tunnelContent!, hektometer, rows);
-				// 	
-				// 	if (tunnelContent != null)
-				// 		rows.Add(new KeyValuePair<string, RowContent>(hektometer, tunnelContent));
-				// }
+				if (TryParseTunnel(mat, row, additionalText, out RowContent? tunnelContent))
+				{
+					if(tunnelContent is TunnelContent tunnel)
+						tunnelType = tunnel.GetTunnelType();
+					
+					// TODO: Different list?
+					tunnelContent = CheckForDuplicateContent(tunnelContent!, hektometer, rows);
+					
+					if (tunnelContent != null)
+						rows.Add(new KeyValuePair<string, RowContent>(hektometer, tunnelContent));
+				}
 
 				if (tunnelType != TunnelType.End)
 				{
