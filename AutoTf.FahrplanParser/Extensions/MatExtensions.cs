@@ -10,7 +10,8 @@ public static class MatExtensions
 	public static bool IsMoreBlackThanWhite(this Mat img)
 	{
 		Mat binaryImg = new Mat();
-		CvInvoke.CvtColor(img, binaryImg, ColorConversion.Bgr2Gray);
+		CvInvoke.CvtColor(img, binaryImg, ColorConversion.Bgr2Gray, 0, AlgorithmHint.Default);
+		// CvInvoke.CvtColor(img, binaryImg, ColorConversion.Bgr2Gray);
 		CvInvoke.Threshold(binaryImg, binaryImg, 128, 255, ThresholdType.Binary);
 
 		int whitePixels = CvInvoke.CountNonZero(binaryImg);
@@ -27,7 +28,8 @@ public static class MatExtensions
 		Mat roiMat = new Mat(mat, roi);
 
 		Mat hsv = new Mat();
-		CvInvoke.CvtColor(roiMat, hsv, ColorConversion.Bgr2Hsv);
+		CvInvoke.CvtColor(roiMat, hsv, ColorConversion.Bgr2Gray, 0, AlgorithmHint.Default);
+		// CvInvoke.CvtColor(roiMat, hsv, ColorConversion.Bgr2Hsv);
 
 		ScalarArray lowerYellow = new ScalarArray(new MCvScalar(25, 100, 100));
 		ScalarArray upperYellow = new ScalarArray(new MCvScalar(35, 255, 255));

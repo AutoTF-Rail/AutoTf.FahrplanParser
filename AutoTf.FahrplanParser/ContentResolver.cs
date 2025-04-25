@@ -143,10 +143,12 @@ internal static class ContentResolver
 	{
 		Rectangle roi = new Rectangle(row.X + 386, row.Y, 60, 44);
 		Mat area = new Mat(mat, roi);
-		CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
+		CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray, 0, AlgorithmHint.Default);
+		// CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
 
 		if (area.NumberOfChannels != 1)
-			CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
+			CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray, 0, AlgorithmHint.Default);
+			// CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
 
 		return area;
 	}
@@ -155,10 +157,12 @@ internal static class ContentResolver
 	{
 		Rectangle roi = new Rectangle(row.X + 348, row.Y, 35, 44);
 		Mat area = new Mat(mat, roi);
-		CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
+		CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray, 0, AlgorithmHint.Default);
+		// CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
 
 		if (area.NumberOfChannels != 1)
-			CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
+			CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray, 0, AlgorithmHint.Default);
+			// CvInvoke.CvtColor(area, area, ColorConversion.Bgr2Gray);
 
 		return area;
 	}
