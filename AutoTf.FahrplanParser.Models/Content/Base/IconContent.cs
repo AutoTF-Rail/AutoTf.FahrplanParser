@@ -19,7 +19,7 @@ public abstract class IconContent : RowContent
 	private static bool SearchForIcon(Mat area, Mat icon)
 	{
 		if (icon.NumberOfChannels != 1)
-			CvInvoke.CvtColor(icon, icon, ColorConversion.Bgr2Gray, 0, AlgorithmHint.Default);
+			CvInvoke.CvtColor(icon, icon, ColorConversion.Bgr2Gray);
 
 		int resultCols = area.Cols - icon.Cols + 1;
 		int resultRows = area.Rows - icon.Rows + 1;

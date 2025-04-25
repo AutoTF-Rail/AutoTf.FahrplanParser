@@ -1,7 +1,6 @@
 ﻿using AutoTf.FahrplanParser.Content.Content;
 using AutoTf.FahrplanParser.Content.Content.Base;
 using Emgu.CV;
-using Emgu.CV.CvEnum;
 using Emgu.CV.OCR;
 
 namespace AutoTf.FahrplanParser.Demo;
@@ -12,17 +11,6 @@ internal static class Program
 	// TODO: Resizing the files to respective sizes to the ROI's? Or resize the ROI to the image?
 	public static Task Main(string[] args)
 	{
-		var method = typeof(CvInvoke).GetMethod("CvtColor", 
-			new Type[] { typeof(IInputArray), typeof(IOutputArray), typeof(ColorConversion), typeof(int) });
-
-		if (method != null)
-		{
-			Console.WriteLine("Method found!");
-		}
-		else
-		{
-			Console.WriteLine("Method not found!");
-		}
 		Console.WriteLine("AutoTF Fahrplan Parser");
 		DateTime start = DateTime.Now;
 		
